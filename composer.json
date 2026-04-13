@@ -1,77 +1,82 @@
 {
-    "name": "qadir/pashto-calendar",
-    "description": "A Laravel package for Pashto Solar Hijri calendar with localization and RTL support",
-    "keywords": [
-        "pashto",
-        "calendar",
-        "laravel",
-        "afghanistan",
-        "hijri",
-        "solar"
-    ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
-    "license": "MIT",
-    "authors": [
-        {
-           "name": "Abdul Qadir Nasrat",
-            "email": "abdulqadirnasrat483@gmail.com",
-            "role": "Developer"
-        }
-    ],
-    "require": {
-        "php": "^8.4",
-        "spatie/laravel-package-tools": "^1.16",
-        "illuminate/contracts": "^11.0||^12.0"
+  "name": "qadir/pashto-calendar",
+  "type": "library",
+  "description": "A Laravel package for Pashto Solar Hijri calendar with localization and RTL support",
+  "keywords": [
+    "pashto",
+    "calendar",
+    "laravel",
+    "afghanistan",
+    "hijri",
+    "solar"
+  ],
+  "homepage": "https://github.com/:vendor_slug/:package_slug",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Abdul Qadir Nasrat",
+      "email": "abdulqadirnasrat483@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.1 || ^8.2 || ^8.3 || ^8.4",
+    "illuminate/contracts": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+    "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+    "spatie/laravel-package-tools": "^1.93"
+  },
+  "require-dev": {
+    "laravel/pint": "^1.14",
+    "nunomaduro/collision": "^8.8",
+    "larastan/larastan": "^3.0",
+    "orchestra/testbench": "^10.0.0||^9.0.0",
+    "pestphp/pest": "^4.0",
+    "pestphp/pest-plugin-arch": "^4.0",
+    "pestphp/pest-plugin-laravel": "^4.0",
+    "phpstan/extension-installer": "^1.4",
+    "phpstan/phpstan-deprecation-rules": "^2.0",
+    "phpstan/phpstan-phpunit": "^2.0",
+    "spatie/laravel-ray": "^1.35"
+  },
+  "autoload": {
+    "psr-4": {
+      "Qadir\\PashtoCalendar\\": "src/"
     },
-    "require-dev": {
-        "laravel/pint": "^1.14",
-        "nunomaduro/collision": "^8.8",
-        "larastan/larastan": "^3.0",
-        "orchestra/testbench": "^10.0.0||^9.0.0",
-        "pestphp/pest": "^4.0",
-        "pestphp/pest-plugin-arch": "^4.0",
-        "pestphp/pest-plugin-laravel": "^4.0",
-        "phpstan/extension-installer": "^1.4",
-        "phpstan/phpstan-deprecation-rules": "^2.0",
-        "phpstan/phpstan-phpunit": "^2.0",
-        "spatie/laravel-ray": "^1.35"
-    },
-   "autoload": {
-  "psr-4": {
-    "Qadir\\PashtoCalendar\\": "src/"
-  }
-},
-    "autoload-dev": {
-        "psr-4": {
-            "Qadir\\PashtoCalendar\\Tests\\": "tests/",
-            "Workbench\\App\\": "workbench/app/"
-        }
-    },
-    "scripts": {
-        "post-autoload-dump": "@composer run prepare",
-        "prepare": "@php vendor/bin/testbench package:discover --ansi",
-        "analyse": "vendor/bin/phpstan analyse",
-        "test": "vendor/bin/pest",
-        "test-coverage": "vendor/bin/pest --coverage",
-        "format": "vendor/bin/pint"
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true
-        }
-    },
-    "extra": {
-        "laravel": {
-                    "providers": [
-                "Qadir\\PashtoCalendar\\PashtoCalendarServiceProvider"
-            ],
-            "aliases": {
-                "PashtoCalendar": "Qadir\\PashtoCalendar\\Facades\\PashtoCalendar"
-            }
-        }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    "files": [
+      "src/Support/helpers.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Qadir\\PashtoCalendar\\Tests\\": "tests/",
+      "Workbench\\App\\": "workbench/app/"
+    }
+  },
+  "scripts": {
+    "post-autoload-dump": "@composer run prepare",
+    "prepare": "@php vendor/bin/testbench package:discover --ansi",
+    "analyse": "vendor/bin/phpstan analyse",
+    "test": "vendor/bin/pest",
+    "test-coverage": "vendor/bin/pest --coverage",
+    "format": "vendor/bin/pint"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true,
+      "phpstan/extension-installer": true
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Qadir\\PashtoCalendar\\PashtoCalendarServiceProvider"
+      ],
+      "aliases": {
+        "PashtoCalendar": "Qadir\\PashtoCalendar\\Facades\\PashtoCalendar"
+      }
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }
