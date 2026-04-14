@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Qadir\PashtoCalendar\Models\PashtoEvent;
 use Qadir\PashtoCalendar\View\Components\Calendar;
+use Qadir\PashtoCalendar\Support\Holidays;
 
 class PashtoCalendarServiceProvider extends ServiceProvider
 {
@@ -75,6 +76,9 @@ class PashtoCalendarServiceProvider extends ServiceProvider
 
         // ✅ Register package routes
         $this->registerRoutes();
+        Blade::if('Holiday', function ($month, $day) {
+        return Holidays::isHoliday($month, $day);
+    });
     }
 
     // ============================================================
