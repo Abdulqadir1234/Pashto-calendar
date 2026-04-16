@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ps" dir="{{ ($rtl ?? true) ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
