@@ -137,6 +137,31 @@ class PashtoCalendarServiceProvider extends ServiceProvider
             'sample' => $sample,
         ]);
     })->middleware('web');
+
+    // ✅ API — returns calendar JSON for a specific month (no page reload)
+Route::get('/pashto-calendar/data/{year}/{month}', function ($year, $month) {
+    $year  = (int) $year;
+    $month = (int) $month;
+
+    if ($month > 12) { $month = 1;  $year++; }
+    if ($month < 1)  { $month = 12; $year--; }
+
+    $days = \Qadir\PashtoCalendar\PashtoCalendar::make($year, $month);
+
+    // Convert events to array so JSON works properly
+    $days = array_map(function ($day) {
+        if (!empty($day['empty'])) return $day;
+        $day['events'] = $day['events']->map(fn($e) => $e->toArray())->values()->toArray();
+        return $day;
+    }, $days);
+
+    return response()->json([
+        'year'       => $year,
+        'month'      => $month,
+        'month_name' => \Qadir\PashtoCalendar\PashtoDate::monthNameStatic($month),
+        'days'       => $days,
+    ]);
+})->middleware('web');
 }
     // ============================================================
     // ✅ VALIDATION RULES (Phase 4)
