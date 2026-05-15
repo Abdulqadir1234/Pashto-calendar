@@ -1,0 +1,114 @@
+[
+  {
+    "year": 1405,
+    "month": 1,
+    "day": 1,
+    "name": "نوی کال / کوچنی اختر",
+    "name_en": "Nowruz / Eid al-Fitr",
+    "type": "public,religious"
+  },
+  {
+    "year": 1405,
+    "month": 1,
+    "day": 2,
+    "name": "کوچنی اختر (درېیمه ورځ)",
+    "name_en": "Eid al-Fitr (Day 3)",
+    "type": "religious"
+  },
+  {
+    "year": 1405,
+    "month": 2,
+    "day": 8,
+    "name": "د مجاهدینو د بریا ورځ",
+    "name_en": "Mujahideen Victory Day",
+    "type": "public"
+  },
+  {
+    "year": 1405,
+    "month": 2,
+    "day": 11,
+    "name": "د کارګرانو نړیواله ورځ",
+    "name_en": "International Workers' Day",
+    "type": "public"
+  },
+  {
+    "year": 1405,
+    "month": 3,
+    "day": 4,
+    "name": "عرفه",
+    "name_en": "Day of Arafat",
+    "type": "religious"
+  },
+  {
+    "year": 1405,
+    "month": 3,
+    "day": 5,
+    "name": "لوی اختر (لومړۍ ورځ)",
+    "name_en": "Eid al-Adha (Day 1)",
+    "type": "religious"
+  },
+  {
+    "year": 1405,
+    "month": 3,
+    "day": 6,
+    "name": "لوی اختر (دویمه ورځ)",
+    "name_en": "Eid al-Adha (Day 2)",
+    "type": "religious"
+  },
+  {
+    "year": 1405,
+    "month": 3,
+    "day": 7,
+    "name": "لوی اختر (درېیمه ورځ)",
+    "name_en": "Eid al-Adha (Day 3)",
+    "type": "religious"
+  },
+  {
+    "year": 1405,
+    "month": 4,
+    "day": 3,
+    "name": "عاشورا",
+    "name_en": "Ashura",
+    "type": "religious"
+  },
+  {
+    "year": 1405,
+    "month": 5,
+    "day": 24,
+    "name": "د افغانستان اسلامي امارت د بریا ورځ",
+    "name_en": "Victory Day of the Islamic Emirate",
+    "type": "public"
+  },
+  {
+    "year": 1405,
+    "month": 5,
+    "day": 28,
+    "name": "د خپلواکۍ ورځ",
+    "name_en": "Independence Day",
+    "type": "public"
+  },
+  {
+    "year": 1405,
+    "month": 6,
+    "day": 2,
+    "name": "میلاد النبي",
+    "name_en": "Mawlid al-Nabi",
+    "type": "religious"
+  },
+  {
+    "year": 1405,
+    "month": 6,
+    "day": 9,
+    "name": "د شهیدانو ورځ",
+    "name_en": "Martyrs' Day",
+    "type": "public"
+  },
+  {
+    "year": 1405,
+    "month": 11,
+    "day": 26,
+    "name": "د شوروي اتحاد د ماتې او وتلو ورځ",
+    "name_en": "Soviet Withdrawal Day",
+    "type": "public"
+  }
+]
