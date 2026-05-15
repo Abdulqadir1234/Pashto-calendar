@@ -322,12 +322,13 @@ class PashtoDate
 
     public function isHoliday(): bool
     {
-        return Holidays::isHoliday($this->month, $this->day);
+        return Holidays::isHoliday($this->year, $this->month, $this->day);
     }
 
     public function holidayName(): ?string
     {
-        return Holidays::getHoliday($this->month, $this->day);
+        // return Holidays::getHoliday($this->year,$this->month, $this->day);
+        return Holidays::getName($this->year, $this->month, $this->day);
     }
 
     public function isWorkingDay(): bool
