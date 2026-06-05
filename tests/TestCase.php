@@ -4,6 +4,8 @@ namespace Qadir\PashtoCalendar\Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
 use Qadir\PashtoCalendar\PashtoCalendarServiceProvider;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 
 class TestCase extends Orchestra
 {
@@ -35,5 +37,39 @@ class TestCase extends Orchestra
 
         $app['config']->set('pashto-calendar.language', 'ps');
         $app['config']->set('pashto-calendar.demo_route', true);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Create the events table if it doesn't exist
+        $this->createPashtoEventsTable();
+    }
+
+    /**
+     * Create the pashto_events table (including recurrence fields).
+     */
+    protected function createPashtoEventsTable(): void
+    {
+        if (Schema::hasTable('pashto_events')) {
+            return;
+        }
+
+        Schema::create('pashto_events', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->integer('year');
+            $table->integer('month');
+            $table->integer('day');
+            $table->string('time')->nullable();
+            $table->string('color')->default('#3b82f6');
+            $table->string('recurrence')->nullable()->default('none');
+            $table->date('recurrence_end_date')->nullable();
+            $table->timestamps();
+
+            $table->index(['year', 'month', 'day']);
+        });
     }
 }
