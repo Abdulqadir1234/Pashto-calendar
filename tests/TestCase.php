@@ -43,8 +43,9 @@ class TestCase extends Orchestra
     {
         parent::setUp();
 
-        // Create the events table if it doesn't exist
+        // Create both required tables
         $this->createPashtoEventsTable();
+        $this->createPashtoHolidaysTable();
     }
 
     /**
@@ -70,6 +71,31 @@ class TestCase extends Orchestra
             $table->timestamps();
 
             $table->index(['year', 'month', 'day']);
+        });
+    }
+
+    /**
+     * Create the pashto_holidays table.
+     */
+    protected function createPashtoHolidaysTable(): void
+    {
+        if (Schema::hasTable('pashto_holidays')) {
+            return;
+        }
+
+        Schema::create('pashto_holidays', function (Blueprint $table) {
+            $table->id();
+            $table->integer('year');
+            $table->integer('month');
+            $table->integer('day');
+            $table->string('name');
+            $table->string('name_en')->nullable();
+            $table->text('description')->nullable();
+            $table->string('type')->nullable();
+            $table->json('raw_data')->nullable();
+            $table->timestamps();
+
+            $table->unique(['year', 'month', 'day']);
         });
     }
 }
