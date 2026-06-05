@@ -9,9 +9,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        php: [8.2, 8.3]
+        php: [8.3, 8.4]   # ✅ only PHP versions that Pest v4 supports
 
     steps:
       - uses: actions/checkout@v4
@@ -21,20 +22,10 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: sqlite3, pdo_sqlite
-          coverage: xdebug              # ← enable coverage driver
+          coverage: none
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
       - name: Run tests
         run: vendor/bin/pest --colors=always
-
-      # ✅ Add the coverage steps right here
-      - name: Generate coverage report
-        run: vendor/bin/pest --coverage-clover coverage.xml
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.xml
-          fail_ci_if_error: false
