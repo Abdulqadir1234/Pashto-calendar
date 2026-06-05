@@ -1,7 +1,7 @@
 <?php
 
 use Qadir\PashtoCalendar\Models\PashtoEvent;
-use Qadir\PashtoCalendar\EventManager;
+use Qadir\PashtoCalendar\Events\EventManager; 
 
 beforeEach(function () {
     $this->requireDatabase();   // Only runs if SQLite is loaded
