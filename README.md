@@ -1,5 +1,5 @@
 # 📅 Pashto Calendar for Laravel
-
+[![Tests](https://github.com/Abdulqadir1234/Pashto-calendar/actions/workflows/tests.yml/badge.svg)](https://github.com/Abdulqadir1234/Pashto-calendar/actions/workflows/tests.yml)
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/qadir/pashto-calendar.svg?style=flat-square)](https://packagist.org/packages/qadir/pashto-calendar)
 [![Total Downloads](https://img.shields.io/packagist/dt/qadir/pashto-calendar.svg?style=flat-square)](https://packagist.org/packages/qadir/pashto-calendar)
 [![License](https://img.shields.io/github/license/Abdulqadir1234/Pashto-calendar?style=flat-square)](LICENSE.md)
@@ -32,3 +32,15 @@ You can install the package via Composer:
 
 ```bash
 composer require qadir/pashto-calendar
+
+## 🕌 Prayer Times
+
+The package includes a self‑contained prayer times calculator for **all 34 Afghan provinces**.  
+Times are computed locally using the **Muslim World League** method (Fajr 18°, Isha 17°) and the **Hanafi** school for Asr.
+
+### Display Prayer Times
+
+Place the Blade component anywhere in your views:
+
+```blade
+<x-pashto-prayer-times city="kabul" />

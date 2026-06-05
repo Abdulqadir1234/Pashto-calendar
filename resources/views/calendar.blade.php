@@ -825,6 +825,7 @@
 {{-- REAL CLOCK BAR                                               --}}
 {{-- ============================================================ --}}
 <div class="clock-bar">
+
     
     <div>
         <div class="clock-date-label">{{ pcal_trans('current_date') }}</div>
@@ -840,21 +841,42 @@
         <div class="clock-seconds" x-text="dateLabel"></div>
     </div>
 
-    <div style="display:flex; align-items:center; gap:16px;">
-        <a href="/pashto-calendar/converter" class="nav-btn" style="font-size:14px; padding:6px 16px; gap:6px;">🔄 {{ pcal_trans('converter') }}</a>
-        <a href="/pashto-calendar/year" class="nav-btn" style="font-size:14px; padding:6px 16px; gap:6px;">📆 {{ pcal_trans('year') }}</a>
+   <div style="display:flex; align-items:center; gap:16px;">
+    <a href="/pashto-calendar/converter" class="nav-btn" style="font-size:14px; padding:6px 16px; gap:6px;">🔄 {{ pcal_trans('converter') }}</a>
+    <a href="/pashto-calendar/year" class="nav-btn" style="font-size:14px; padding:6px 16px; gap:6px;">📆 {{ pcal_trans('year') }}</a>
 
-        <button class="theme-toggle" @click="darkMode = !darkMode">
-            <span x-show="darkMode">🌙</span>
-            <span x-show="!darkMode">☀️</span>
-            <span x-text="darkMode ? '{{ pcal_trans('dark_mode') }}' : '{{ pcal_trans('light_mode') }}'"></span>
-        </button>
-        <div style="text-align:left; direction:ltr;">
-            <div class="clock-date-label">{{ pcal_trans('gregorian') }}</div>
-            <div class="gregorian-date">{{ now()->format('d M Y') }}</div>
-        </div>
+    {{-- 🕌 Prayer Times Toggle Button --}}
+    <button class="nav-btn" style="font-size:14px; padding:6px 16px; gap:6px;"
+            @click="showPrayerTimes = !showPrayerTimes">
+        🕌 {{ pcal_trans('prayer_times') }}
+    </button>
+
+    <button class="theme-toggle" @click="darkMode = !darkMode">
+        <span x-show="darkMode">🌙</span>
+        <span x-show="!darkMode">☀️</span>
+        <span x-text="darkMode ? '{{ pcal_trans('dark_mode') }}' : '{{ pcal_trans('light_mode') }}'"></span>
+    </button>
+    <div style="text-align:left; direction:ltr;">
+        <div class="clock-date-label">{{ pcal_trans('gregorian') }}</div>
+        <div class="gregorian-date">{{ now()->format('d M Y') }}</div>
     </div>
 </div>
+</div>
+
+{{-- Prayer Times Toggle Panel --}}
+<div x-show="showPrayerTimes"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 -translate-y-2"
+     x-transition:enter-end="opacity-100 translate-y-0"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100 translate-y-0"
+     x-transition:leave-end="opacity-0 -translate-y-2"
+     style="max-width: 900px; margin: 0 auto; padding: 0 16px 16px;"
+     @click.away="showPrayerTimes = false">
+    <x-pashto-prayer-times city="kabul" />
+</div>
+
+
 
 {{-- ============================================================ --}}
 {{-- CALENDAR + CONVERTER (shared wrapper)                        --}}
@@ -1082,19 +1104,22 @@ function clockApp() {
         time: '',
         dateLabel: '',
         darkMode: localStorage.getItem('theme') !== 'light',
+        showPrayerTimes: false, 
         init() {
             this.tick();
             setInterval(() => this.tick(), 1000);
         },
-        tick() {
-            const now   = new Date();
-            const h     = String(now.getHours()).padStart(2, '0');
-            const m     = String(now.getMinutes()).padStart(2, '0');
-            const s     = String(now.getSeconds()).padStart(2, '0');
-            this.time   = h + ':' + m + ':' + s;
-            const days  = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
-            this.dateLabel = days[now.getDay()];
-        }
+       tick() {
+    const now   = new Date();
+    const h24   = now.getHours();
+    const h12   = h24 % 12 === 0 ? 12 : h24 % 12;  // 12‑hour format
+    const ampm  = h24 >= 12 ? 'PM' : 'AM';          // English AM/PM
+    const m     = String(now.getMinutes()).padStart(2, '0');
+    const s     = String(now.getSeconds()).padStart(2, '0');
+    this.time   = h12 + ':' + m + ':' + s + ' ' + ampm;
+    const days  = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+    this.dateLabel = days[now.getDay()];
+},
     };
 }
 

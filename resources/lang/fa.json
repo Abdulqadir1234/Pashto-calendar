@@ -122,5 +122,15 @@
   "view_month": "مشاهده ماه",
   "load_year_failed": "بارگذاری اطلاعات سال ناموفق بود",
 
-  "view_full_calendar": "مشاهده تقویم کامل"
+  "view_full_calendar": "مشاهده تقویم کامل",
+
+  "prayer_fajr": "فجر",
+  "prayer_sunrise": "طلوع",
+  "prayer_dhuhr": "ظهر",
+  "prayer_asr": "عصر",
+  "prayer_maghrib": "مغرب",
+  "prayer_isha": "عشاء",
+  "demo_section_prayer": "✦ اوقات شرعی",
+  "prayer_times": "اوقات شرعی",
+  "demo_prayer_title": "اوقات نماز برای شهرهای افغانستان"
 }

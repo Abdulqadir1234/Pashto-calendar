@@ -141,7 +141,7 @@ if (!function_exists('pcal_trans')) {
      * Get a translated string from the package’s JSON files.
      * Falls back to hardcoded Pashto if the key or locale file is missing.
      */
-    function pcal_trans(string $key, string $locale = null): mixed
+    function pcal_trans(string $key, ?string $locale = null): mixed
     {
         static $lines = [];
 
@@ -296,6 +296,17 @@ if (!function_exists('pcal_trans')) {
 'load_year_failed'     => 'Failed to load year data',
 
 'view_full_calendar' => 'بشپړ کلیندر وګورئ',
+
+// Prayer times
+'prayer_fajr'    => 'سحر',
+'prayer_sunrise' => 'لومړی لمر',
+'prayer_dhuhr'   => 'ماسپښین',
+'prayer_asr'     => 'مازیګر',
+'prayer_maghrib' => 'ماښام',
+'prayer_isha'    => 'ماخستن',
+'prayer_times' => 'اوقات شرعي',
+'demo_section_prayer' => '✦ اوقات شرعي',
+'demo_prayer_title'   => 'د افغانستان د ښارونو لپاره د لمانځه وختونه',
         ];
 
         return $lines[$locale][$key]

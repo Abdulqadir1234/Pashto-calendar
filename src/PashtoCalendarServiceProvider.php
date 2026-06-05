@@ -78,6 +78,18 @@ public function boot(): void
             RefreshHolidays::class,
         ]);
     }
+
+    //prayer time component
+    // Merge prayer cities config (so it's always available)
+$this->mergeConfigFrom(__DIR__.'/../config/pashto-prayer-cities.php', 'pashto-prayer-cities');
+
+// Publish the cities config
+$this->publishes([
+    __DIR__.'/../config/pashto-prayer-cities.php' => config_path('pashto-prayer-cities.php'),
+], 'pashto-calendar-config');
+
+// Register the prayer times component
+Blade::component('pashto-prayer-times', \Qadir\PashtoCalendar\View\Components\PrayerTimes::class);
 }
 
     protected function registerRoutes(): void
@@ -206,6 +218,23 @@ public function boot(): void
 
     return view('pashto-calendar::converter', [
         'rtl' => config('pashto-calendar.rtl', true),
+    ]);
+})->middleware('web');
+
+    // prayer time route
+    Route::get('/pashto-calendar/prayer-times/{city?}', function ($city = 'kabul') {
+    $service = new \Qadir\PashtoCalendar\Services\PrayerTimeService($city);
+    $times = $service->getTimes();
+    return response()->json([
+        'times'     => [
+            'fajr'    => $times['fajr'],
+            'sunrise' => $times['sunrise'],
+            'dhuhr'   => $times['dhuhr'],
+            'asr'     => $times['asr'],
+            'maghrib' => $times['maghrib'],
+            'isha'    => $times['isha'],
+        ],
+        'city_name' => $times['city_name'],
     ]);
 })->middleware('web');
         // Demo page

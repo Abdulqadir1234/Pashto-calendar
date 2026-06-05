@@ -122,5 +122,15 @@
   "view_month": "View Month",
   "load_year_failed": "Failed to load year data",
 
-  "view_full_calendar": "View Full Calendar"
+  "view_full_calendar": "View Full Calendar",
+
+  "prayer_fajr": "Fajr",
+  "prayer_sunrise": "Sunrise",
+  "prayer_dhuhr": "Dhuhr",
+  "prayer_asr": "Asr",
+  "prayer_maghrib": "Maghrib",
+  "prayer_isha": "Isha",
+  "demo_section_prayer": "✦ Prayer Times",
+  "prayer_times": "Prayer Times",
+  "demo_prayer_title": "Prayer Times for Afghan Cities"
 }

@@ -132,5 +132,15 @@
   "view_month": "میاشت وګورئ",
   "load_year_failed": "د کال معلومات پورته کول ناکام شول",
 
-  "view_full_calendar": "بشپړ کلیندر وګورئ"
+  "view_full_calendar": "بشپړ کلیندر وګورئ",
+
+  "prayer_fajr": "سحر",
+  "prayer_sunrise": "لومړی لمر",
+  "prayer_dhuhr": "ماسپښین",
+  "prayer_asr": "مازیګر",
+  "prayer_maghrib": "ماښام",
+  "prayer_isha": "ماخستن",
+  "demo_section_prayer": "✦ اوقات شرعي",
+  "prayer_times": "اوقات شرعي",
+  "demo_prayer_title": "د افغانستان د ښارونو لپاره د لمانځه وختونه"
 }
