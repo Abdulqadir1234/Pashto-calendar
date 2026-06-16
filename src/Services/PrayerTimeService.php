@@ -7,9 +7,7 @@ use IslamicNetwork\PrayerTimes\PrayerTimes;
 class PrayerTimeService
 {
     protected string $city;
-    protected array  $cityConfig;
-    protected string $method    = 'MWL';      // Muslim World League
-    protected string $asrMethod = 'Hanafi';    // Hanafi school
+    protected array $cityConfig;
 
     public function __construct(string $city = 'kabul')
     {
@@ -22,56 +20,40 @@ class PrayerTimeService
     {
         $date = $date ?: now()->toDateString();
 
-        $lat = (float) $this->cityConfig['lat'];
-        $lng = (float) $this->cityConfig['lng'];
+        // Create with method and school
+        // MWL = Muslim World League, 1 = Hanafi Asr
+        $pt = new PrayerTimes('MWL', 1);
 
-        // Calculate UTC offset for the given date and timezone
-        $tzOffset = $this->getUtcOffset($date, $this->cityConfig['timezone']);
-
-        // Create the prayer times calculator
-        $pt = new PrayerTimes($this->method, $this->asrMethod);
-
-        // ✅ Pass the offset as a FLOAT (not a timezone string)
         $times = $pt->getTimes(
             new \DateTime($date),
-            $lat,
-            $lng,
-            $tzOffset   // e.g. 4.5 for Kabul
+            (float) $this->cityConfig['lat'],
+            (float) $this->cityConfig['lng'],
+            null,    // timezone (use default)
+            null     // elevation
         );
+
+        // Convert 24-hour to 12-hour AM/PM
+        $to12Hour = function ($time24) {
+            if (empty($time24)) return '';
+            $parts = explode(':', $time24);
+            $h = (int) $parts[0];
+            $m = $parts[1] ?? '00';
+            $ampm = $h >= 12 ? 'PM' : 'AM';
+            $h12 = $h % 12;
+            if ($h12 == 0) $h12 = 12;
+            return sprintf('%d:%02d %s', $h12, $m, $ampm);
+        };
 
         return [
             'city'      => $this->city,
             'city_name' => $this->cityConfig['name'],
             'date'      => $date,
-            'fajr'      => $this->formatTime($times['Fajr']),
-            'sunrise'   => $this->formatTime($times['Sunrise']),
-            'dhuhr'     => $this->formatTime($times['Dhuhr']),
-            'asr'       => $this->formatTime($times['Asr']),
-            'maghrib'   => $this->formatTime($times['Maghrib']),
-            'isha'      => $this->formatTime($times['Isha']),
+            'fajr'      => $to12Hour($times['Fajr']),
+            'sunrise'   => $to12Hour($times['Sunrise']),
+            'dhuhr'     => $to12Hour($times['Dhuhr']),
+            'asr'       => $to12Hour($times['Asr']),
+            'maghrib'   => $to12Hour($times['Maghrib']),
+            'isha'      => $to12Hour($times['Isha']),
         ];
-    }
-
-    /**
-     * Calculate the UTC offset in hours for a specific date and timezone.
-     */
-    private function getUtcOffset(string $date, string $timezone): float
-    {
-        $dt = new \DateTime($date . ' 12:00:00', new \DateTimeZone('UTC'));
-        $dt->setTimezone(new \DateTimeZone($timezone));
-        return $dt->getOffset() / 3600.0;
-    }
-
-    /**
-     * Convert 24‑hour "HH:MM" to 12‑hour "H:MM AM/PM".
-     */
-    protected function formatTime(string $time24): string
-    {
-        [$h, $m] = explode(':', $time24);
-        $h = (int) $h;
-        $ampm = $h >= 12 ? 'PM' : 'AM';
-        $h12 = $h % 12;
-        if ($h12 == 0) $h12 = 12;
-        return sprintf('%d:%02d %s', $h12, $m, $ampm);
     }
 }

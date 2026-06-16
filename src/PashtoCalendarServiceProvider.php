@@ -15,6 +15,8 @@ use Qadir\PashtoCalendar\Support\Holidays;
 use Qadir\PashtoCalendar\Services\HolidayService;
 use Qadir\PashtoCalendar\Console\Commands\RefreshHolidays;
 use Illuminate\Support\Facades\App;
+
+use Spatie\IcalendarGenerator\Components\Event;
 class PashtoCalendarServiceProvider extends ServiceProvider
 {
     public function register(): void
@@ -208,6 +210,45 @@ Blade::component('pashto-prayer-times', \Qadir\PashtoCalendar\View\Components\Pr
                 'font'       => config('pashto-calendar.font', 'Noto Naskh Arabic, serif'),
             ]);
         })->middleware('web');
+
+        //ical export route
+        
+Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month) {
+    $year  = (int) $year;
+    $month = (int) $month;
+
+    $allEvents = \Qadir\PashtoCalendar\Models\PashtoEvent::getOccurrencesForMonth($year, $month);
+
+    if (empty($allEvents)) {
+        return response('No events to export', 404);
+    }
+
+    $calendar = \Spatie\IcalendarGenerator\Components\Calendar::create(config('app.name', 'Pashto Calendar'))
+        ->refreshInterval(5);
+
+    foreach ($allEvents as $event) {
+        $gregorian = to_gregorian($year, $month, $event->day);
+
+        // Safely format the time
+        $time = $event->time ? trim($event->time) : '';
+        // If the time does not match a HH:MM pattern, fallback to 00:00
+        if (!preg_match('/^\d{1,2}:\d{2}$/', $time)) {
+            $time = '00:00';
+        }
+
+        $calendar->event(
+            \Spatie\IcalendarGenerator\Components\Event::create($event->title)
+                ->description(strip_tags($event->description ?? ''))
+                ->startsAt(new \DateTime($gregorian . ' ' . $time))
+                ->endsAt(new \DateTime($gregorian . ' ' . $time))
+                ->uniqueIdentifier($event->id)
+        );
+    }
+
+    return response($calendar->get())
+        ->header('Content-Type', 'text/calendar; charset=utf-8')
+        ->header('Content-Disposition', 'attachment; filename="pashto-calendar-' . $year . '-' . $month . '.ics"');
+})->middleware('web');
 
         // Converter page
       Route::get('/pashto-calendar/converter', function (\Illuminate\Http\Request $request) {

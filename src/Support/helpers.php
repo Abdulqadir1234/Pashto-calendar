@@ -307,6 +307,9 @@ if (!function_exists('pcal_trans')) {
 'prayer_times' => 'اوقات شرعي',
 'demo_section_prayer' => '✦ اوقات شرعي',
 'demo_prayer_title'   => 'د افغانستان د ښارونو لپاره د لمانځه وختونه',
+
+'export_ical' => 'Download iCal',
+'export'      => 'Export',
         ];
 
         return $lines[$locale][$key]

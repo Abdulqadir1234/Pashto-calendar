@@ -132,5 +132,8 @@
   "prayer_isha": "Isha",
   "demo_section_prayer": "✦ Prayer Times",
   "prayer_times": "Prayer Times",
-  "demo_prayer_title": "Prayer Times for Afghan Cities"
+  "demo_prayer_title": "Prayer Times for Afghan Cities",
+
+  "export_ical": "Download iCal",
+  "export": "Export"
 }

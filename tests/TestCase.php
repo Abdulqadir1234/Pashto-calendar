@@ -43,14 +43,13 @@ class TestCase extends Orchestra
     {
         parent::setUp();
 
-        // Create both required tables
-        $this->createPashtoEventsTable();
-        $this->createPashtoHolidaysTable();
+        // Only create tables if SQLite is available
+        if (extension_loaded('pdo_sqlite')) {
+            $this->createPashtoEventsTable();
+            $this->createPashtoHolidaysTable();
+        }
     }
 
-    /**
-     * Create the pashto_events table (including recurrence fields).
-     */
     protected function createPashtoEventsTable(): void
     {
         if (Schema::hasTable('pashto_events')) {
@@ -69,14 +68,10 @@ class TestCase extends Orchestra
             $table->string('recurrence')->nullable()->default('none');
             $table->date('recurrence_end_date')->nullable();
             $table->timestamps();
-
             $table->index(['year', 'month', 'day']);
         });
     }
 
-    /**
-     * Create the pashto_holidays table.
-     */
     protected function createPashtoHolidaysTable(): void
     {
         if (Schema::hasTable('pashto_holidays')) {
@@ -94,7 +89,6 @@ class TestCase extends Orchestra
             $table->string('type')->nullable();
             $table->json('raw_data')->nullable();
             $table->timestamps();
-
             $table->unique(['year', 'month', 'day']);
         });
     }

@@ -132,5 +132,8 @@
   "prayer_isha": "عشاء",
   "demo_section_prayer": "✦ اوقات شرعی",
   "prayer_times": "اوقات شرعی",
-  "demo_prayer_title": "اوقات نماز برای شهرهای افغانستان"
+  "demo_prayer_title": "اوقات نماز برای شهرهای افغانستان",
+
+  "export_ical": "دانلود iCal",
+  "export": "خروجی"
 }
