@@ -1,6 +1,5 @@
 {
   "name": "qadirnasrat/pashto-calendar",
-  "version": "1.0.0",
   "type": "library",
   "description": "A Laravel package for Pashto Solar Hijri calendar with events, holidays, localization, RTL support, and offline-ready assets.",
   "keywords": [
@@ -22,20 +21,19 @@
       "role": "Developer"
     }
   ],
-  "require": {
-    "php": "^8.1 || ^8.2 || ^8.3",
-    "illuminate/contracts": "^10.0 || ^11.0 || ^12.0",
-    "illuminate/support": "^10.0 || ^11.0 || ^12.0",
-    "illuminate/view": "^10.0 || ^11.0 || ^12.0",
-    "illuminate/routing": "^10.0 || ^11.0 || ^12.0",
-    "spatie/laravel-package-tools": "^1.93",
-    "islamic-network/prayer-times": "^1.0"
-  },
+   "require": {
+        "php": "^8.1",
+        "illuminate/contracts": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/view": "^10.0|^11.0|^12.0|^13.0",
+        "spatie/laravel-package-tools": "^1.93",
+        "islamic-network/prayer-times": "^1.0"
+    },
   "require-dev": {
     "laravel/pint": "^1.14",
     "nunomaduro/collision": "^8.0",
     "larastan/larastan": "^3.0",
-    "orchestra/testbench": "^8.0 || ^9.0 || ^10.0",
+    "orchestra/testbench": "^8.0|^9.0|^10.0|^11.0",
     "pestphp/pest": "^4.0",
     "pestphp/pest-plugin-arch": "^4.0",
     "pestphp/pest-plugin-laravel": "^4.0",
