@@ -64,7 +64,7 @@ A comprehensive Laravel package for the **Pashto Solar Hijri (Shamsi) calendar**
 ### 1. Install via Composer
 
 ```bash
-composer require qadir/pashto-calendar
+composer require qadirnasrat/pashto-calendar
 ```
 
 Publish Configuration & Assets:
