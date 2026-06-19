@@ -1,24 +1,35 @@
 {
   "name": "pashto-calendar",
   "version": "1.0.0",
-  "description": "[![Tests](https://github.com/Abdulqadir1234/Pashto-calendar/actions/workflows/tests.yml/badge.svg)](https://github.com/Abdulqadir1234/Pashto-calendar/actions/workflows/tests.yml)\r [![Latest Version on Packagist](https://img.shields.io/packagist/v/qadir/pashto-calendar.svg?style=flat-square)](https://packagist.org/packages/qadir/pashto-calendar)\r [![Total Downloads](https://img.shields.io/packagist/dt/qadir/pashto-calendar.svg?style=flat-square)](https://packagist.org/packages/qadir/pashto-calendar)\r [![License](https://img.shields.io/github/license/Abdulqadir1234/Pashto-calendar?style=flat-square)](LICENSE.md)\r [![Laravel 10+](https://img.shields.io/badge/Laravel-10%2B-FF2D20?style=flat-square&logo=laravel)](https://laravel.com)\r ![Calendar Demo](https://raw.githubusercontent.com/Abdulqadir1234/Pashto-calendar/main/docs/screenshot.png)",
+  "description": "Pashto Calendar Laravel package with events, holidays, dark mode and offline support",
   "main": "index.js",
   "directories": {
     "doc": "docs",
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run build:css && npm run build:js",
+    "build:css": "tailwindcss -i ./resources/css/app.css -o ./public/css/pashto-calendar.css --minify",
+    "build:js": "esbuild resources/js/app.js --bundle --minify --outfile=public/js/pashto-calendar.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "laravel",
+    "calendar",
+    "pashto",
+    "jalali",
+    "alpinejs",
+    "tailwind"
+  ],
+  "author": "Abdul Qadir Nasrat",
+  "license": "MIT",
   "dependencies": {
-    "alpinejs": "^3.15.12"
+    "alpinejs": "^3.15.12",
+    "axios": "^1.18.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.5.0",
     "postcss": "^8.5.15",
-    "tailwindcss": "^3.4.0"
+    "tailwindcss": "^3.4.0",
+    "esbuild": "^0.23.0"
   }
 }

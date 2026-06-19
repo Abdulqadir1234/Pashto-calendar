@@ -1,5 +1,5 @@
-module.exports = {
-  content: ["./resources/views/**/*.blade.php", "./src/**/*.php"],
+export default {
+  content: ["./resources/views/**/*.blade.php", "./resources/js/**/*.js"],
   theme: {
     extend: {},
   },

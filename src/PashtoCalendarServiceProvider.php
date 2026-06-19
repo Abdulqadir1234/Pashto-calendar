@@ -87,9 +87,8 @@ $this->mergeConfigFrom(__DIR__.'/../config/pashto-prayer-cities.php', 'pashto-pr
 
 // Publish the cities config
 $this->publishes([
-    __DIR__.'/../config/pashto-prayer-cities.php' => config_path('pashto-prayer-cities.php'),
-], 'pashto-calendar-config');
-
+    __DIR__.'/../public' => public_path('vendor/pashto-calendar'),
+], 'pashto-calendar-assets');
 // Register the prayer times component
 Blade::component('pashto-prayer-times', \Qadir\PashtoCalendar\View\Components\PrayerTimes::class);
 }
