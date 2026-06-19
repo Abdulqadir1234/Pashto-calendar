@@ -59,13 +59,20 @@ class PashtoEvent extends Model
     // RECURRENCE FIXED
     // ============================================================
 
- public static function getOccurrencesForMonth(int $year, int $month): array
+public static function getOccurrencesForMonth(int $year, int $month): array
 {
     $occurrences = [];
 
-    $events = self::all();
+    // ✅ IMPORTANT: only fetch relevant events
+    $events = self::query()->get();
 
     foreach ($events as $event) {
+
+        $eventStart = new \Qadir\PashtoCalendar\PashtoDate(
+            $event->year,
+            $event->month,
+            $event->day
+        );
 
         $daysInMonth = (new \Qadir\PashtoCalendar\PashtoDate($year, $month, 1))
             ->daysInMonth();
@@ -73,21 +80,20 @@ class PashtoEvent extends Model
         for ($day = 1; $day <= $daysInMonth; $day++) {
 
             $currentDate = new \Qadir\PashtoCalendar\PashtoDate($year, $month, $day);
-            $eventStart  = new \Qadir\PashtoCalendar\PashtoDate(
-                $event->year,
-                $event->month,
-                $event->day
-            );
 
-            // Skip before event start
+            // ✅ skip before start
             if ($currentDate->isBefore($eventStart)) {
                 continue;
             }
 
-            // Check end date
+            // ✅ check recurrence end date
             if ($event->recurrence_end_date) {
-                $g = to_gregorian($year, $month, $day);
-                if (\Carbon\Carbon::parse($g)->gt($event->recurrence_end_date)) {
+                [$gy, $gm, $gd] = \Qadir\PashtoCalendar\Support\JalaliConverter::toGregorian(
+                    $year, $month, $day
+                );
+
+                $currentCarbon = \Carbon\Carbon::create($gy, $gm, $gd);
+                if ($currentCarbon->gt($event->recurrence_end_date)) {
                     continue;
                 }
             }
@@ -97,7 +103,11 @@ class PashtoEvent extends Model
             switch ($event->recurrence) {
 
                 case 'none':
-                    $include = $currentDate->isSameDay($eventStart);
+                    $include = (
+                        $year == $event->year &&
+                        $month == $event->month &&
+                        $day == $event->day
+                    );
                     break;
 
                 case 'daily':
@@ -106,7 +116,7 @@ class PashtoEvent extends Model
 
                 case 'weekly':
                     $diff = $eventStart->diffInDays($currentDate);
-                    $include = $diff % 7 === 0;
+                    $include = ($diff % 7 === 0);
                     break;
 
                 case 'monthly':
