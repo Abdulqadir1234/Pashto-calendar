@@ -7,7 +7,7 @@
     <!-- <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs" defer></script> -->
     <link href="{{ asset('vendor/pashto-calendar/css/pashto-calendar.css') }}">
-<script src="{{ asset('vendor/pashto-calendar/js/pashto-calendar.js') }}"></script>
+    <script src="{{ asset('vendor/pashto-calendar/js/pashto-calendar.js') }}"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
