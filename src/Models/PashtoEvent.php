@@ -59,91 +59,94 @@ class PashtoEvent extends Model
     // RECURRENCE FIXED
     // ============================================================
 
-    public static function getOccurrencesForMonth(int $year, int $month): array
-    {
-        $occurrences = [];
+   public static function getOccurrencesForMonth(int $year, int $month): array
+{
+    $occurrences = [];
 
-        $events = self::all();
+    $events = self::all();
 
-        foreach ($events as $event) {
+    foreach ($events as $event) {
 
-            // NON-RECURRING
-            if ($event->recurrence === 'none') {
-                if ($event->year == $year && $event->month == $month) {
-                    $occurrences[] = $event;
-                }
+        // Get total days in this month
+        $daysInMonth = (new \Qadir\PashtoCalendar\PashtoDate($year, $month, 1))
+            ->daysInMonth($year, $month);
+
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+
+            // Skip days before event start
+            if (
+                $year < $event->year ||
+                ($year == $event->year && $month < $event->month) ||
+                ($year == $event->year && $month == $event->month && $day < $event->day)
+            ) {
                 continue;
             }
 
-            // START DATE
-            $current = new \Qadir\PashtoCalendar\PashtoDate(
-                $event->year,
-                $event->month,
-                $event->day
-            );
-
-            $targetMonthDays = \Qadir\PashtoCalendar\PashtoCalendar::monthLength($year, $month);
-
-            // LOOP SAFE LIMIT (prevents infinite loop)
-            for ($i = 0; $i < 500; $i++) {
-
-                // STOP if passed target month
-                if (
-                    $current->year > $year ||
-                    ($current->year == $year && $current->month > $month)
-                ) {
-                    break;
-                }
-
-                // END DATE CHECK
-                if ($event->recurrence_end_date) {
-                    [$endY, $endM, $endD] = explode('-', $event->recurrence_end_date);
-
-                    if (
-                        $current->year > $endY ||
-                        ($current->year == $endY && $current->month > $endM) ||
-                        ($current->year == $endY && $current->month == $endM && $current->day > $endD)
-                    ) {
-                        break;
-                    }
-                }
-
-                // MATCH TARGET MONTH
-                if ($current->year == $year && $current->month == $month) {
-
-                    $occurrence = $event->replicate();
-                    $occurrence->id = $event->id;
-                    $occurrence->year = $year;
-                    $occurrence->month = $month;
-                    $occurrence->day = $current->day;
-
-                    $occurrences[] = $occurrence;
-                }
-
-                // MOVE NEXT
-                switch ($event->recurrence) {
-                    case 'daily':
-                        $current = $current->addDays(1);
-                        break;
-
-                    case 'weekly':
-                        $current = $current->addDays(7);
-                        break;
-
-                    case 'monthly':
-                        $current = $current->addMonths(1);
-                        break;
-
-                    case 'yearly':
-                        $current = $current->addYears(1);
-                        break;
-
-                    default:
-                        break 2;
+            // Check end date
+            if ($event->recurrence_end_date) {
+                $currentGregorian = to_gregorian($year, $month, $day);
+                if ($currentGregorian > $event->recurrence_end_date) {
+                    continue;
                 }
             }
-        }
 
-        return $occurrences;
+            $include = false;
+
+            switch ($event->recurrence) {
+
+                case 'none':
+                    $include = (
+                        $year == $event->year &&
+                        $month == $event->month &&
+                        $day == $event->day
+                    );
+                    break;
+
+                case 'daily':
+                    $include = true;
+                    break;
+
+                case 'weekly':
+                    $start = new \Qadir\PashtoCalendar\PashtoDate(
+                        $event->year,
+                        $event->month,
+                        $event->day
+                    );
+
+                    $current = new \Qadir\PashtoCalendar\PashtoDate(
+                        $year,
+                        $month,
+                        $day
+                    );
+
+                    $diff = $start->diffInDays($current);
+                    $include = $diff % 7 === 0;
+                    break;
+
+                case 'monthly':
+                    $include = ($day == $event->day);
+                    break;
+
+                case 'yearly':
+                    $include = (
+                        $month == $event->month &&
+                        $day == $event->day
+                    );
+                    break;
+            }
+
+            if ($include) {
+                $occurrence = $event->replicate();
+                $occurrence->id = $event->id;
+                $occurrence->year = $year;
+                $occurrence->month = $month;
+                $occurrence->day = $day;
+
+                $occurrences[] = $occurrence;
+            }
+        }
     }
+
+    return $occurrences;
+}
 }
