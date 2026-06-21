@@ -6,17 +6,35 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
-{
-    Schema::table('pashto_holidays', function (Blueprint $table) {
-        $table->text('description')->nullable()->after('name_en');
-    });
-}
+    public function up(): void
+    {
+        Schema::create('pashto_holidays', function (Blueprint $table) {
+            $table->id();
 
-    public function down()
-{
-    Schema::table('pashto_holidays', function (Blueprint $table) {
-        $table->dropColumn('description');
-    });
-}
+            $table->integer('year');
+            $table->integer('month');
+            $table->integer('day');
+
+            $table->string('name');
+            $table->string('name_en')->nullable();
+
+            $table->date('gregorian_date')->nullable();
+
+            $table->boolean('is_recurring')->default(false);
+
+            $table->string('type')->nullable();
+
+            $table->json('raw_data')->nullable();
+
+            $table->timestamps();
+
+            $table->unique(['year', 'month', 'day']);
+            $table->index(['year', 'month']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('pashto_holidays');
+    }
 };
