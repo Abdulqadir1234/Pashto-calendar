@@ -6,8 +6,9 @@
     <title>{{ pcal_trans('converter_title') }}</title>
     <!-- <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs" defer></script> -->
-    <link href="{{ asset('vendor/pashto-calendar/css/pashto-calendar.css') }}">
-    <script src="{{ asset('vendor/pashto-calendar/js/pashto-calendar.js') }}"></script>
+    <link rel="stylesheet"
+      href="{{ asset('vendor/pashto-calendar/css/pashto-calendar.css') }}">
+   <script defer src="{{ asset('vendor/pashto-calendar/js/pashto-calendar.js') }}"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -484,7 +485,7 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator:hover { opacit
 <div class="stars" id="stars"></div>
 
 <!-- ── CONVERTER SHELL ── -->
-<div class="converter-shell" x-data="converterApp()">
+<div class="converter-shell" x-data="converterApp">
 
     <!-- HEADER -->
     <div class="header-area">
@@ -546,7 +547,7 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator:hover { opacit
         </div>
 
         <!-- ── RIGHT PANEL: Pashto → Gregorian ── -->
-        <div class="panel panel-right" x-data="pashtoDatePicker()">
+        <div class="panel panel-right" x-data="pashtoDatePicker">
 
             <!-- horizontal divider for mobile -->
             <div class="h-divider" style="display:none; margin: 0 0 24px; position:relative; height:1px; background: linear-gradient(90deg,transparent,rgba(240,165,0,0.2),transparent);">
@@ -634,128 +635,211 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator:hover { opacit
 <!-- Translation strings -->
 <script>
 window.converterTrans = {
-    pickDateFirst:    @json(pcal_trans('pick_date_first')),
-    invalidFormat:    @json(pcal_trans('invalid_format')),
+    pickDateFirst: @json(pcal_trans('pick_date_first')),
+    invalidFormat: @json(pcal_trans('invalid_format')),
     conversionFailed: @json(pcal_trans('conversion_failed')),
 };
-</script>
 
-<script>
-/* ── STAR FIELD ── */
-(function(){
-    const s = document.getElementById('stars');
-    for(let i=0;i<120;i++){
-        const el = document.createElement('div');
-        el.className='star';
-        const sz = Math.random()*2+0.5;
-        el.style.cssText = `
-            width:${sz}px;height:${sz}px;
-            top:${Math.random()*100}%;left:${Math.random()*100}%;
-            --dur:${2+Math.random()*4}s;
-            --op:${0.3+Math.random()*0.6};
-            animation-delay:${Math.random()*5}s;
-        `;
-        s.appendChild(el);
-    }
-})();
+document.addEventListener('alpine:init', () => {
 
-/* ── CONVERTER APP ── */
-function converterApp() {
-    return {
+    Alpine.data('converterApp', () => ({
         gregorianInput: '',
         pashtoResult: '',
 
         copyText(txt) {
-            if(navigator.clipboard) navigator.clipboard.writeText(txt);
+            navigator.clipboard?.writeText(txt);
         },
 
         async convertGregorian() {
             if (!this.gregorianInput) return;
-            try {
-                const r = await fetch(`/pashto-calendar/convert/gregorian?date=${encodeURIComponent(this.gregorianInput)}`);
-                const d = await r.json();
-                if (d.error) alert(d.error);
-                else this.pashtoResult = `${d.formatted}  (${d.year}-${d.month}-${d.day})`;
-            } catch(e) { alert(window.converterTrans.conversionFailed); }
-        }
-    };
-}
 
-/* ── PASHTO DATE PICKER ── */
-function pashtoDatePicker() {
-    return {
+            try {
+                const r = await fetch(
+                    `/pashto-calendar/convert/gregorian?date=${encodeURIComponent(this.gregorianInput)}`
+                );
+
+                const d = await r.json();
+
+                if (d.error) {
+                    alert(d.error);
+                    return;
+                }
+
+                this.pashtoResult =
+                    `${d.formatted} (${d.year}-${d.month}-${d.day})`;
+
+            } catch {
+                alert(window.converterTrans.conversionFailed);
+            }
+        }
+    }));
+
+    Alpine.data('pashtoDatePicker', () => ({
         dateText: '',
         open: false,
-        viewYear:  {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->year }},
+
+        viewYear: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->year }},
         viewMonth: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->month }},
-        selectedDay: null, selectedMonth: null, selectedYear: null,
-        todayYear:  {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->year }},
+
+        selectedDay: null,
+        selectedMonth: null,
+        selectedYear: null,
+
+        todayYear: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->year }},
         todayMonth: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->month }},
-        todayDay:   {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->day }},
-        monthNames: ['','وری','غویی','غبرګولی','چنګاښ','زمری','وږی','تله','لړم','لیندۍ','مرغومی','سلواغه','کب'],
+        todayDay: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->day }},
+
+        monthNames: [
+            '',
+            'وری',
+            'غویی',
+            'غبرګولی',
+            'چنګاښ',
+            'زمری',
+            'وږی',
+            'تله',
+            'لړم',
+            'لیندۍ',
+            'مرغومی',
+            'سلواغه',
+            'کب'
+        ],
+
         gregorianResult: '',
 
-        get monthName() { return this.monthNames[this.viewMonth]||''; },
+        get monthName() {
+            return this.monthNames[this.viewMonth] || '';
+        },
+
         get days() {
-            const dim   = this.daysInMonth(this.viewYear, this.viewMonth);
+            const dim = this.daysInMonth(this.viewYear, this.viewMonth);
             const first = this.firstDayOfWeek(this.viewYear, this.viewMonth);
+
             const cells = [];
-            for(let i=0;i<first;i++) cells.push({day:null});
-            for(let d=1;d<=dim;d++) cells.push({day:d});
-            while(cells.length<42) cells.push({day:null});
+
+            for (let i = 0; i < first; i++) cells.push({ day: null });
+
+            for (let d = 1; d <= dim; d++) cells.push({ day: d });
+
+            while (cells.length < 42) cells.push({ day: null });
+
             return cells;
         },
-        daysInMonth(y,m) {
-            const l=[31,31,31,31,31,31,30,30,30,30,30,29];
-            if(m===12&&[1,5,9,13,17,21,25,29].includes(y%33)) return 30;
-            return l[m-1];
+
+        daysInMonth(y, m) {
+            const l = [31,31,31,31,31,31,30,30,30,30,30,29];
+
+            if (
+                m === 12 &&
+                [1,5,9,13,17,21,25,29].includes(y % 33)
+            ) {
+                return 30;
+            }
+
+            return l[m - 1];
         },
-        firstDayOfWeek(y,m) {
-            let t=0;
-            for(let yr=1403;yr<y;yr++) t+=this.isLeapYear(yr)?366:365;
-            for(let mo=1;mo<m;mo++) t+=this.daysInMonth(y,mo);
-            return (t+4)%7;
+
+        firstDayOfWeek(y, m) {
+            let t = 0;
+
+            for (let yr = 1403; yr < y; yr++) {
+                t += this.isLeapYear(yr) ? 366 : 365;
+            }
+
+            for (let mo = 1; mo < m; mo++) {
+                t += this.daysInMonth(y, mo);
+            }
+
+            return (t + 4) % 7;
         },
-        isLeapYear(y){ return [1,5,9,13,17,21,25,29].includes(y%33); },
-        isSelected(d){ return this.selectedYear&&this.selectedMonth===this.viewMonth&&this.selectedYear===this.viewYear&&d===this.selectedDay; },
-        isToday(d){ return d===this.todayDay&&this.viewMonth===this.todayMonth&&this.viewYear===this.todayYear; },
-        changeMonth(delta){
-            let m=this.viewMonth+delta, y=this.viewYear;
-            if(m>12){m=1;y++;} if(m<1){m=12;y--;}
-            this.viewMonth=m; this.viewYear=y;
+
+        isLeapYear(y) {
+            return [1,5,9,13,17,21,25,29].includes(y % 33);
         },
-        selectDate(d){
-            this.selectedYear=this.viewYear; this.selectedMonth=this.viewMonth; this.selectedDay=d;
-            this.dateText=`${this.selectedYear}/${String(this.selectedMonth).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
-            this.open=false;
+
+        isSelected(d) {
+            return this.selectedYear &&
+                this.selectedMonth === this.viewMonth &&
+                this.selectedYear === this.viewYear &&
+                d === this.selectedDay;
+        },
+
+        isToday(d) {
+            return d === this.todayDay &&
+                this.viewMonth === this.todayMonth &&
+                this.viewYear === this.todayYear;
+        },
+
+        changeMonth(delta) {
+            let m = this.viewMonth + delta;
+            let y = this.viewYear;
+
+            if (m > 12) {
+                m = 1;
+                y++;
+            }
+
+            if (m < 1) {
+                m = 12;
+                y--;
+            }
+
+            this.viewMonth = m;
+            this.viewYear = y;
+        },
+
+        selectDate(d) {
+            this.selectedYear = this.viewYear;
+            this.selectedMonth = this.viewMonth;
+            this.selectedDay = d;
+
+            this.dateText =
+                `${this.selectedYear}/${String(this.selectedMonth).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
+
+            this.open = false;
+
             this.convertPashto();
         },
-        copyText(txt){ if(navigator.clipboard) navigator.clipboard.writeText(txt); },
-        async convertPashto(){
-            if(!this.selectedYear||!this.selectedMonth||!this.selectedDay){
-                alert(window.converterTrans.pickDateFirst); return;
-            }
-            try{
-                const r=await fetch(`/pashto-calendar/convert/pashto?year=${this.selectedYear}&month=${this.selectedMonth}&day=${this.selectedDay}`);
-                const d=await r.json();
-                if(d.error) alert(d.error);
-                else this.gregorianResult=d.gregorian;
-            }catch(e){ alert(window.converterTrans.conversionFailed); }
-        },
-        convertFromText(){
-            const p=this.dateText.split('/');
-            if(p.length===3){
-                const y=parseInt(p[0]),m=parseInt(p[1]),d=parseInt(p[2]);
-                if(!isNaN(y)&&!isNaN(m)&&!isNaN(d)){
-                    this.selectedYear=y; this.selectedMonth=m; this.selectedDay=d;
-                    this.viewYear=y; this.viewMonth=m;
-                    this.convertPashto(); return;
+
+        async convertPashto() {
+            try {
+                const r = await fetch(
+                    `/pashto-calendar/convert/pashto?year=${this.selectedYear}&month=${this.selectedMonth}&day=${this.selectedDay}`
+                );
+
+                const d = await r.json();
+
+                if (d.error) {
+                    alert(d.error);
+                    return;
                 }
+
+                this.gregorianResult = d.gregorian;
+
+            } catch {
+                alert(window.converterTrans.conversionFailed);
             }
-            alert(window.converterTrans.invalidFormat);
+        },
+
+        convertFromText() {
+            const p = this.dateText.split('/');
+
+            if (p.length !== 3) {
+                alert(window.converterTrans.invalidFormat);
+                return;
+            }
+
+            this.selectedYear = parseInt(p[0]);
+            this.selectedMonth = parseInt(p[1]);
+            this.selectedDay = parseInt(p[2]);
+
+            this.viewYear = this.selectedYear;
+            this.viewMonth = this.selectedMonth;
+
+            this.convertPashto();
         }
-    };
-}
+    }));
+});
 </script>
 </body>
 </html>
