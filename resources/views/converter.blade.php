@@ -1,846 +1,914 @@
 <!DOCTYPE html>
 <html lang="ps" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ pcal_trans('converter_title') }}</title>
-    <!-- <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs" defer></script> -->
-    <link rel="stylesheet"
-      href="{{ asset('vendor/pashto-calendar/css/pashto-calendar.css') }}">
-   <script defer src="{{ asset('vendor/pashto-calendar/js/pashto-calendar.js') }}"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ pcal_trans('converter_title') }}</title>
+<link rel="stylesheet" href="{{ asset('vendor/pashto-calendar/css/pashto-calendar.css') }}">
+<script defer src="{{ asset('vendor/pashto-calendar/js/pashto-calendar.js') }}"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ── TOKENS ── */
-:root {
-    --gold:        #f0a500;
-    --gold-light:  #ffd166;
-    --gold-dim:    rgba(240,165,0,0.12);
-    --gold-glow:   rgba(240,165,0,0.25);
-    --teal:        #0dd9c4;
-    --teal-dim:    rgba(13,217,196,0.1);
-    --rose:        #ff4e6a;
-    --navy-deep:   #03060e;
-    --navy-mid:    #080d1c;
-    --navy-card:   #0c1528;
-    --navy-panel:  #0f1b30;
-    --border-sub:  rgba(255,255,255,0.06);
-    --border-gold: rgba(240,165,0,0.22);
-    --text-1:      #f0ece4;
-    --text-2:      #8899b4;
-    --text-3:      #4a5a72;
-    --r-sm: 12px; --r-md: 18px; --r-lg: 26px; --r-xl: 36px;
-    --ease: cubic-bezier(.4,0,.2,1);
+:root{
+  --gold:#d4920a;--gold-l:#f0b429;--gold-ll:#fce09b;--gold-dim:rgba(212,146,10,.1);--gold-bdr:rgba(212,146,10,.28);
+  --teal:#0891b2;--teal-l:#22d3ee;--teal-ll:#a5f3fc;--teal-dim:rgba(8,145,178,.1);--teal-bdr:rgba(8,145,178,.28);
+  --rose:#e11d48;--rose-l:#fb7185;--rose-ll:#fecdd3;--rose-dim:rgba(225,29,72,.09);--rose-bdr:rgba(225,29,72,.28);
+  --bg:#060b14;--bg2:#0b1422;--bg3:#101d30;--bg4:#16243e;
+  --sur:rgba(255,255,255,.06);--sur2:rgba(255,255,255,.04);--sur3:rgba(255,255,255,.02);
+  --t1:#f1f5f9;--t2:#94a3b8;--t3:#475569;--t4:#1e293b;
+  --r8:8px;--r12:12px;--r16:16px;--r24:24px;--r32:32px;--r99:99px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.4);
+  --shadow-md:0 4px 16px rgba(0,0,0,.5);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.6);
+  --shadow-xl:0 24px 80px rgba(0,0,0,.7);
+  --ease:cubic-bezier(.4,0,.2,1);
 }
-
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 
-/* ── BODY + BACKGROUND ── */
-body {
-    background: var(--navy-deep);
-    font-family: 'Noto Naskh Arabic', serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 32px 16px;
-    overflow-x: hidden;
-    position: relative;
+body{
+  background:var(--bg);
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 16px 80px;
+  overflow-x:hidden;position:relative;
 }
 
-/* animated aurora blobs */
-.bg-aurora {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
-}
-.blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(120px);
-    opacity: 0.18;
-    animation: driftBlob 18s ease-in-out infinite alternate;
-    will-change: transform;
-}
-.blob-1 { width: 600px; height: 600px; background: #f0a500; top: -180px; left: -200px; animation-delay: 0s; }
-.blob-2 { width: 500px; height: 500px; background: #0dd9c4; bottom: -150px; right: -150px; animation-delay: -6s; }
-.blob-3 { width: 350px; height: 350px; background: #6366f1; top: 40%; left: 50%; translate: -50% -50%; animation-delay: -12s; opacity: 0.1; }
+/* ── BACKGROUND ── */
+.aurora{position:fixed;inset:0;pointer-events:none;z-index:0;}
+.blob{position:absolute;border-radius:50%;filter:blur(100px);will-change:transform;animation:drift 22s ease-in-out infinite alternate;}
+.b1{width:700px;height:700px;background:radial-gradient(circle,rgba(212,146,10,.18),transparent 70%);top:-200px;left:-200px;}
+.b2{width:600px;height:600px;background:radial-gradient(circle,rgba(8,145,178,.14),transparent 70%);bottom:-180px;right:-180px;animation-delay:-8s;}
+.b3{width:400px;height:400px;background:radial-gradient(circle,rgba(225,29,72,.10),transparent 70%);top:40%;left:50%;translate:-50% -50%;animation-delay:-16s;}
+@keyframes drift{from{transform:translate(0,0);}to{transform:translate(30px,25px);}}
 
-@keyframes driftBlob {
-    from { transform: translate(0,0) scale(1); }
-    to   { transform: translate(40px, 30px) scale(1.1); }
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:48px 48px;
 }
 
-/* star-field dots */
-.stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-.star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--dur, 3s) ease-in-out infinite; opacity: 0; }
-@keyframes twinkle {
-    0%,100%{opacity:0;} 50%{opacity:var(--op,0.6);}
+/* ── SHELL ── */
+.shell{position:relative;z-index:10;width:100%;max-width:980px;animation:up .5s var(--ease) both;}
+@keyframes up{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+
+/* ── HEADER ── */
+.header{text-align:center;margin-bottom:40px;}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--gold-dim);border:1px solid var(--gold-bdr);
+  border-radius:var(--r99);padding:4px 14px;
+  font-size:10px;letter-spacing:2.5px;color:var(--gold-l);text-transform:uppercase;
+  margin-bottom:16px;
+}
+.edot{width:5px;height:5px;background:var(--gold-l);border-radius:50%;
+      box-shadow:0 0 8px var(--gold-l);animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.6);}}
+.h1{
+  font-size:clamp(24px,4vw,40px);font-weight:700;letter-spacing:-.5px;
+  background:linear-gradient(135deg,var(--gold-l) 0%,var(--gold-ll) 30%,var(--teal-l) 65%,var(--rose-l) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:10px;line-height:1.2;
+}
+.h2{font-size:13.5px;color:var(--t2);letter-spacing:.2px;}
+.h2 span{opacity:.35;margin:0 8px;}
+
+/* ── TABS ── */
+.tabs{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:6px;
+  margin-bottom:32px;
+  padding:6px;
+  background:var(--bg2);
+  border:1px solid var(--sur);
+  border-radius:var(--r16);
+  width:fit-content;
+  margin-left:auto;margin-right:auto;
+}
+.tab{
+  padding:8px 16px;border-radius:var(--r12);font-size:12px;font-weight:500;
+  cursor:pointer;border:none;background:transparent;color:var(--t3);
+  transition:all .18s var(--ease);white-space:nowrap;font-family:inherit;
+}
+.tab:hover{color:var(--t2);background:var(--sur);}
+.tab.ag{background:var(--gold-dim);color:var(--gold-l);box-shadow:0 0 0 1px var(--gold-bdr);}
+.tab.at{background:var(--teal-dim);color:var(--teal-l);box-shadow:0 0 0 1px var(--teal-bdr);}
+.tab.ar{background:var(--rose-dim);color:var(--rose-l);box-shadow:0 0 0 1px var(--rose-bdr);}
+
+/* ── CARD ── */
+.card{
+  background:var(--bg2);
+  border:1px solid var(--sur);
+  border-radius:var(--r32);
+  box-shadow:var(--shadow-xl),0 0 0 1px rgba(255,255,255,.03) inset;
+  overflow:visible;  /* CRITICAL: never clip — dropdowns must escape */
+  position:relative;
+}
+.card::before{
+  content:'';position:absolute;inset:0;border-radius:var(--r32);pointer-events:none;
+  background:linear-gradient(135deg,rgba(212,146,10,.04) 0%,transparent 50%,rgba(8,145,178,.03) 100%);
 }
 
-/* grid overlay */
-body::after {
-    content:'';
-    position:fixed; inset:0; z-index:0; pointer-events:none;
-    background-image:
-        linear-gradient(rgba(240,165,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(240,165,0,0.025) 1px, transparent 1px);
-    background-size: 60px 60px;
+/* ── DIRECTION STRIP ── */
+.dstrip{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:14px 24px;border-bottom:1px solid var(--sur);
+  border-radius:var(--r32) var(--r32) 0 0;
+  background:var(--sur3);
 }
+.dpill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 14px;border-radius:var(--r99);font-size:12px;font-weight:600;
+}
+.dpill.g{background:var(--gold-dim);border:1px solid var(--gold-bdr);color:var(--gold-l);}
+.dpill.t{background:var(--teal-dim);border:1px solid var(--teal-bdr);color:var(--teal-l);}
+.dpill.r{background:var(--rose-dim);border:1px solid var(--rose-bdr);color:var(--rose-l);}
+.darrow{color:var(--t3);font-size:18px;line-height:1;}
 
-/* ── MAIN CARD ── */
-.converter-shell {
-    position: relative; z-index: 10;
-    width: 100%; max-width: 900px;
-    animation: shellIn 0.6s var(--ease) both;
-}
-@keyframes shellIn {
-    from { opacity:0; transform: translateY(32px) scale(0.97); }
-    to   { opacity:1; transform: none; }
-}
+/* ── PANELS ── */
+.pgrid{display:grid;grid-template-columns:1fr 48px 1fr;}
 
-/* ── HEADER AREA ── */
-.header-area { text-align: center; margin-bottom: 36px; }
+.panel{padding:28px 28px 28px;position:relative;}
+.panel-l{border-radius:0 0 0 var(--r32);}
+.panel-r{border-radius:0 0 var(--r32) 0;}
 
-.header-eyebrow {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--gold-dim);
-    border: 1px solid var(--border-gold);
-    border-radius: 99px;
-    padding: 5px 16px;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    animation: shellIn 0.5s var(--ease) 0.1s both;
-}
-.eyebrow-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; box-shadow: 0 0 6px var(--gold); animation: pulse-dot 2s ease-in-out infinite; }
-@keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.6);opacity:0.4;} }
+/* accent line */
+.abar{position:absolute;top:0;left:20px;right:20px;height:1px;border-radius:var(--r99);opacity:.6;}
+.abar.g{background:linear-gradient(90deg,transparent,var(--gold-l),transparent);}
+.abar.t{background:linear-gradient(90deg,transparent,var(--teal-l),transparent);}
+.abar.r{background:linear-gradient(90deg,transparent,var(--rose-l),transparent);}
 
-.header-title {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(26px, 5vw, 42px);
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--teal) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    line-height: 1.2;
-    margin-bottom: 10px;
-    animation: shellIn 0.5s var(--ease) 0.15s both;
+/* badge */
+.badge{
+  display:inline-flex;align-items:center;gap:7px;
+  border-radius:var(--r99);padding:4px 12px 4px 5px;margin-bottom:14px;
+  font-size:11px;font-weight:600;letter-spacing:.3px;
 }
+.badge.g{background:var(--gold-dim);border:1px solid var(--gold-bdr);color:var(--gold-l);}
+.badge.t{background:var(--teal-dim);border:1px solid var(--teal-bdr);color:var(--teal-l);}
+.badge.r{background:var(--rose-dim);border:1px solid var(--rose-bdr);color:var(--rose-l);}
+.bicon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.bicon.g{background:linear-gradient(135deg,var(--gold-l),#a16207);}
+.bicon.t{background:linear-gradient(135deg,var(--teal-l),#0e7490);}
+.bicon.r{background:linear-gradient(135deg,var(--rose-l),#be123c);}
 
-.header-sub {
-    font-size: 14px; color: var(--text-2);
-    animation: shellIn 0.5s var(--ease) 0.2s both;
-}
+.ptitle{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:20px;line-height:1.4;}
 
-/* ── CONVERTER BODY ── */
-.converter-body {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 0;
-    align-items: start;
-    background: rgba(8,13,28,0.8);
-    border: 1px solid var(--border-sub);
-    border-radius: var(--r-xl);
-    backdrop-filter: blur(40px) saturate(150%);
-    -webkit-backdrop-filter: blur(40px) saturate(150%);
-    box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(240,165,0,0.07) inset, 0 1px 0 rgba(255,255,255,0.05) inset;
-    overflow: visible;
-    position: relative;
-    animation: shellIn 0.5s var(--ease) 0.25s both;
+/* ── FORM ── */
+.flabel{
+  font-size:10.5px;font-weight:600;letter-spacing:1.4px;
+  text-transform:uppercase;color:var(--t3);margin-bottom:7px;display:block;
 }
+.fwrap{position:relative;margin-bottom:14px;}
+.finput{
+  width:100%;background:var(--bg3);
+  border:1px solid rgba(255,255,255,.09);border-radius:var(--r12);
+  padding:13px 16px;color:var(--t1);font-size:14px;outline:none;
+  transition:border-color .18s,box-shadow .18s;
+  font-family:'Inter',sans-serif;-webkit-appearance:none;appearance:none;
+}
+.finput::placeholder{color:var(--t3);}
+.finput.g:focus{border-color:var(--gold-l);box-shadow:0 0 0 3px var(--gold-dim);}
+.finput.t:focus{border-color:var(--teal-l);box-shadow:0 0 0 3px var(--teal-dim);}
+.finput.r:focus{border-color:var(--rose-l);box-shadow:0 0 0 3px var(--rose-dim);}
+input[type="date"].finput::-webkit-calendar-picker-indicator{
+  filter:invert(.5) sepia(1) hue-rotate(10deg) saturate(2);cursor:pointer;opacity:.7;
+}
+.finput-pr{padding-inline-end:46px;}
 
-/* corner accent lines */
-.converter-body::before {
-    content:'';
-    position:absolute; inset:0; border-radius: var(--r-xl); pointer-events:none;
-    background: linear-gradient(135deg, rgba(240,165,0,0.06) 0%, transparent 50%, rgba(13,217,196,0.04) 100%);
+.cal-btn{
+  position:absolute;inset-inline-end:11px;top:50%;translate:0 -50%;
+  background:none;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:var(--r8);
+  transition:background .15s,color .15s;
 }
+.cal-btn.t{color:var(--t3);}
+.cal-btn.t:hover{background:var(--teal-dim);color:var(--teal-l);}
+.cal-btn.r{color:var(--t3);}
+.cal-btn.r:hover{background:var(--rose-dim);color:var(--rose-l);}
 
-/* ── PANEL ── */
-.panel {
-    padding: 36px 32px 32px;
-    position: relative;
+/* ── BUTTON ── */
+.btn{
+  width:100%;font-weight:600;font-size:14px;font-family:'Inter',sans-serif;
+  border:none;border-radius:var(--r12);padding:13px 18px;cursor:pointer;
+  position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
 }
-.panel-left  { border-radius: var(--r-xl) 0 0 var(--r-xl); }
-.panel-right { border-radius: 0 var(--r-xl) var(--r-xl) 0; }
+.btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,transparent 100%);
+  pointer-events:none;
+}
+.btn.g{background:linear-gradient(135deg,var(--gold-l),#92400e);color:#000;box-shadow:0 4px 20px rgba(212,146,10,.3);}
+.btn.t{background:linear-gradient(135deg,var(--teal-l),#0e7490);color:#fff;box-shadow:0 4px 20px rgba(8,145,178,.3);}
+.btn.r{background:linear-gradient(135deg,var(--rose-l),#9f1239);color:#fff;box-shadow:0 4px 20px rgba(225,29,72,.3);}
+.btn.g:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(212,146,10,.45);}
+.btn.t:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(8,145,178,.45);}
+.btn.r:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(225,29,72,.45);}
+.btn:active{transform:scale(.97);}
 
-.panel-badge {
-    display: inline-flex; align-items: center; gap: 7px;
-    background: var(--gold-dim);
-    border: 1px solid var(--border-gold);
-    border-radius: 99px;
-    padding: 4px 12px 4px 6px;
-    margin-bottom: 20px;
-}
-.panel-badge-icon {
-    width: 26px; height: 26px;
-    background: linear-gradient(135deg, var(--gold), #c87800);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-}
-.panel-badge-icon svg { display:block; }
-.panel-badge-text { font-size: 12px; color: var(--gold-light); font-weight: 600; letter-spacing: 0.5px; }
+/* ── RESULT ── */
+.result-area{min-height:118px;display:flex;flex-direction:column;justify-content:flex-end;margin-top:14px;}
+.hint{display:flex;align-items:center;gap:10px;padding:12px 0;}
+.hbar{width:2px;height:40px;border-radius:var(--r99);flex-shrink:0;}
+.hbar.g{background:linear-gradient(180deg,var(--gold-l),transparent);}
+.hbar.t{background:linear-gradient(180deg,var(--teal-l),transparent);}
+.hbar.r{background:linear-gradient(180deg,var(--rose-l),transparent);}
+.htxt{font-size:12.5px;color:var(--t3);line-height:1.65;}
 
-.panel-title {
-    font-family: 'Cinzel', serif;
-    font-size: 17px; font-weight: 600;
-    color: var(--text-1);
-    margin-bottom: 24px;
-    line-height: 1.4;
-}
+.spinner-box{display:flex;justify-content:center;padding:20px 0;}
+.spinner{animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* divider between panels */
-.panel-divider {
-    width: 1px;
-    background: linear-gradient(180deg, transparent 0%, var(--border-gold) 30%, var(--border-gold) 70%, transparent 100%);
-    position: relative;
-    self-align: stretch;
-    min-height: 300px;
+.rbox{
+  padding:16px 18px;border-radius:var(--r16);position:relative;overflow:hidden;
+  animation:rIn .3s var(--ease) both;
 }
+.rbox.g{background:linear-gradient(135deg,rgba(212,146,10,.1),rgba(8,145,178,.04));border:1px solid var(--gold-bdr);}
+.rbox.t{background:linear-gradient(135deg,rgba(8,145,178,.1),rgba(212,146,10,.04));border:1px solid var(--teal-bdr);}
+.rbox.r{background:linear-gradient(135deg,rgba(225,29,72,.1),rgba(212,146,10,.04));border:1px solid var(--rose-bdr);}
+@keyframes rIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.rbox::before{
+  content:'';position:absolute;inset-inline-start:0;top:0;bottom:0;width:3px;border-radius:var(--r99);
+}
+.rbox.g::before{background:linear-gradient(180deg,var(--gold-l),var(--teal-l));}
+.rbox.t::before{background:linear-gradient(180deg,var(--teal-l),var(--gold-l));}
+.rbox.r::before{background:linear-gradient(180deg,var(--rose-l),var(--rose-ll));}
+.rlabel{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:var(--t3);margin-bottom:4px;display:block;}
+.rval{font-size:18px;font-weight:700;line-height:1.4;word-break:break-word;color:var(--t1);}
+.rsub{font-size:12px;color:var(--t3);margin-top:3px;}
+.rcopy{
+  position:absolute;inset-inline-end:10px;top:10px;
+  background:var(--sur2);border:1px solid var(--sur);border-radius:var(--r8);
+  padding:3px 9px;font-size:10.5px;cursor:pointer;
+  display:flex;align-items:center;gap:4px;
+  color:var(--t2);transition:all .15s;font-family:inherit;
+}
+.rcopy:hover{background:var(--sur);color:var(--t1);}
 
-/* swap button in center */
-.swap-hub {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 0 0;
-    position: relative;
-    z-index: 5;
-    width: 64px;
-    align-self: stretch;
+/* ── DIVIDER COL ── */
+.dcol{display:flex;flex-direction:column;align-items:center;padding:16px 0;}
+.dline{flex:1;width:1px;background:linear-gradient(180deg,transparent,var(--sur),transparent);}
+.swapbtn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--bg3);border:1px solid var(--sur);
+  color:var(--t3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;margin:6px 0;flex-shrink:0;
+  transition:all .22s var(--ease);font-family:inherit;
 }
-.swap-btn {
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--navy-card), var(--navy-panel));
-    border: 1px solid var(--border-gold);
-    color: var(--gold);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s var(--ease);
-    box-shadow: 0 0 20px rgba(240,165,0,0.1), 0 4px 16px rgba(0,0,0,0.4);
-    flex-shrink: 0;
-}
-.swap-btn:hover {
-    background: linear-gradient(135deg, var(--gold), #c87800);
-    color: #000;
-    box-shadow: 0 0 30px rgba(240,165,0,0.4), 0 8px 24px rgba(0,0,0,0.4);
-    transform: rotate(180deg) scale(1.1);
-}
-.swap-line {
-    flex: 1;
-    width: 1px;
-    background: linear-gradient(180deg, transparent, var(--border-gold), transparent);
-}
+.swapbtn:hover{border-color:rgba(255,255,255,.2);color:var(--t1);transform:rotate(180deg);}
 
-/* ── LABEL ── */
-.field-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--text-3);
-    margin-bottom: 8px;
-    display: block;
+/* ── CALENDAR DROPDOWN ──────────────────────────────────────────
+   KEY FIX: rendered in a portal div at end of <body>,
+   position:fixed so it is NEVER clipped by any parent overflow.
+   JS measures the trigger button and sets top/left each time.
+─────────────────────────────────────────────────────────────── */
+.pdrop{
+  position:fixed;
+  z-index:99999;
+  width:300px;
+  background:var(--bg2);
+  border-radius:var(--r24);
+  padding:16px;
+  box-shadow:var(--shadow-xl),0 0 0 1px rgba(255,255,255,.06) inset;
+  animation:dropIn .18s var(--ease) both;
+  /* scroll inside if month has many rows */
+  max-height:90vh;overflow-y:auto;
 }
+.pdrop.g{border:1px solid var(--gold-bdr);}
+.pdrop.t{border:1px solid var(--teal-bdr);}
+.pdrop.r{border:1px solid var(--rose-bdr);}
+@keyframes dropIn{from{opacity:0;transform:translateY(-6px) scale(.97);}to{opacity:1;transform:none;}}
 
-/* ── INPUT ── */
-.field-wrap { position: relative; margin-bottom: 16px; }
-.field-input {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: var(--r-sm);
-    padding: 14px 18px;
-    color: var(--text-1);
-    font-size: 15px;
-    outline: none;
-    transition: all 0.2s var(--ease);
-    font-family: 'Noto Naskh Arabic', serif;
-    -webkit-appearance: none;
-    appearance: none;
+.phdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.pnav{
+  width:30px;height:30px;border-radius:var(--r8);
+  border:1px solid var(--sur);background:var(--bg3);
+  color:var(--t2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .14s;font-family:inherit;
 }
-.field-input:focus {
-    border-color: var(--gold);
-    background: rgba(240,165,0,0.06);
-    box-shadow: 0 0 0 3px rgba(240,165,0,0.12);
-}
-.field-input::placeholder { color: var(--text-3); }
+.pnav:hover{background:var(--sur);color:var(--t1);}
+.pmtitle{font-size:13.5px;font-weight:600;color:var(--t1);text-align:center;}
+.pmtitle .pyear{font-size:11px;color:var(--t3);display:block;margin-top:1px;}
 
-input[type="date"].field-input::-webkit-calendar-picker-indicator {
-    filter: invert(0.6) sepia(1) hue-rotate(5deg) saturate(3);
-    cursor: pointer;
-    opacity: 0.7;
+.pcalgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px;}
+.pdn{text-align:center;font-size:10px;color:var(--t3);padding:4px 0;font-weight:600;}
+.pcell{
+  text-align:center;padding:7px 3px;border-radius:var(--r8);
+  cursor:pointer;color:var(--t2);font-size:12.5px;
+  transition:all .12s;line-height:1;font-weight:500;
 }
-input[type="date"].field-input::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+.pcell:hover{color:var(--t1);background:var(--sur);}
+.pcell.empty{cursor:default;pointer-events:none;color:transparent;}
+/* teal — Pashto */
+.pdrop.t .pcell:hover{background:var(--teal-dim);color:var(--teal-l);}
+.pdrop.t .pcell.today{border:1px solid var(--teal-bdr);color:var(--teal-l);font-weight:700;}
+.pdrop.t .pcell.sel{background:var(--teal);color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(8,145,178,.4);}
+/* rose — Hijri */
+.pdrop.r .pcell:hover{background:var(--rose-dim);color:var(--rose-l);}
+.pdrop.r .pcell.today{border:1px solid var(--rose-bdr);color:var(--rose-l);font-weight:700;}
+.pdrop.r .pcell.sel{background:var(--rose);color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(225,29,72,.4);}
 
-.field-input-icon { padding-inline-end: 48px; }
-.field-icon-btn {
-    position: absolute;
-    inset-inline-end: 12px;
-    top: 50%; translate: 0 -50%;
-    background: none; border: none;
-    color: var(--text-3);
-    cursor: pointer; padding: 4px;
-    display: flex; align-items: center; justify-content: center;
-    transition: color 0.2s;
-    border-radius: 6px;
-}
-.field-icon-btn:hover { color: var(--gold); background: var(--gold-dim); }
-
-/* ── CONVERT BUTTON ── */
-.btn-convert {
-    width: 100%;
-    background: linear-gradient(135deg, var(--gold) 0%, #c87800 100%);
-    color: #000;
-    font-weight: 700;
-    font-size: 15px;
-    font-family: 'Noto Naskh Arabic', serif;
-    letter-spacing: 0.5px;
-    border: none;
-    border-radius: var(--r-sm);
-    padding: 14px 20px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.25s var(--ease);
-    box-shadow: 0 4px 20px rgba(240,165,0,0.25);
-}
-.btn-convert::before {
-    content:'';
-    position:absolute; inset:0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
-    translate: -100% 0;
-    transition: translate 0.5s var(--ease);
-}
-.btn-convert:hover::before { translate: 100% 0; }
-.btn-convert:hover {
-    box-shadow: 0 8px 32px rgba(240,165,0,0.45);
-    transform: translateY(-2px);
-}
-.btn-convert:active { transform: scale(0.97); }
-
-/* ── RESULT BOX ── */
-.result-box {
-    margin-top: 16px;
-    padding: 18px 20px;
-    background: linear-gradient(135deg, rgba(240,165,0,0.07), rgba(13,217,196,0.04));
-    border-radius: var(--r-md);
-    border: 1px solid rgba(240,165,0,0.2);
-    position: relative;
-    overflow: hidden;
-    animation: resultIn 0.4s var(--ease) both;
-}
-@keyframes resultIn {
-    from { opacity:0; transform: translateY(8px) scale(0.98); }
-    to   { opacity:1; transform: none; }
-}
-.result-box::before {
-    content:'';
-    position:absolute; inset-inline-start:0; top:0; bottom:0; width:3px;
-    background: linear-gradient(180deg, var(--gold), var(--teal));
-    border-radius: 99px;
-}
-.result-label {
-    font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--text-3); margin-bottom: 6px; display: block;
-}
-.result-value {
-    font-size: 20px; font-weight: 700; color: var(--gold-light);
-    line-height: 1.3; word-break: break-word;
-    font-family: 'Cinzel', serif;
-}
-.result-copy-btn {
-    position: absolute; inset-inline-end: 12px; top: 12px;
-    background: var(--gold-dim); border: 1px solid var(--border-gold);
-    border-radius: 6px; padding: 4px 8px;
-    color: var(--gold); font-size: 11px; cursor: pointer;
-    display: flex; align-items: center; gap: 4px;
-    transition: all 0.2s;
-}
-.result-copy-btn:hover { background: rgba(240,165,0,0.2); }
-
-/* ── PICKER DROPDOWN ── */
-.picker-dropdown {
-    position: absolute;
-    top: calc(100% + 10px);
-    inset-inline-start: 0;
-    width: min(320px, 90vw);
-    background: #0a1122;
-    border: 1px solid rgba(240,165,0,0.25);
-    border-radius: var(--r-lg);
-    z-index: 80;
-    padding: 18px;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(240,165,0,0.05) inset;
-    animation: dropIn 0.2s var(--ease) both;
-}
-@keyframes dropIn {
-    from { opacity:0; transform: translateY(-6px) scale(0.97); }
-    to   { opacity:1; transform: none; }
-}
-.picker-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 14px; padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-sub);
-}
-.picker-nav {
-    width: 30px; height: 30px; border-radius: 8px;
-    background: var(--gold-dim); border: 1px solid var(--border-gold);
-    color: var(--gold); cursor: pointer; font-size: 14px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s;
-}
-.picker-nav:hover { background: rgba(240,165,0,0.22); transform: scale(1.1); }
-.picker-month-title { font-size: 14px; font-weight: 700; color: var(--gold-light); text-align: center; }
-.picker-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-.picker-day-name { text-align:center; font-size:11px; color:var(--text-3); padding: 4px 0; font-weight:600; }
-.picker-day-name:last-child { color: var(--gold); }
-.picker-cell {
-    text-align: center; padding: 7px 2px; border-radius: 7px;
-    cursor: pointer; color: var(--text-1); font-size: 13px;
-    transition: all 0.15s; line-height: 1;
-}
-.picker-cell:hover { background: rgba(240,165,0,0.15); color: var(--gold-light); }
-.picker-cell.today { border: 1px solid rgba(240,165,0,0.4); color: var(--gold); font-weight:700; }
-.picker-cell.selected { background: linear-gradient(135deg, var(--gold), #c87800); color:#000; font-weight:700; box-shadow:0 2px 10px rgba(240,165,0,0.3); }
-.picker-cell.empty { cursor: default; pointer-events:none; }
-
-/* ── DIVIDER (horizontal on mobile) ── */
-.h-divider {
-    display: none;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
-    margin: 0 24px;
-    position: relative;
-}
-.h-divider-hub {
-    position: absolute; top: 50%; left: 50%; translate: -50% -50%;
-    width: 40px; height: 40px; border-radius: 50%;
-    background: var(--navy-mid);
-    border: 1px solid var(--border-gold);
-    color: var(--gold);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 16px rgba(240,165,0,0.15);
-}
+/* ── MOBILE SEP ── */
+.hsep{display:none;height:1px;background:var(--sur);margin:0;}
 
 /* ── FOOTER ── */
-.footer-area {
-    text-align: center; margin-top: 28px;
-    animation: shellIn 0.5s var(--ease) 0.35s both;
+.footer{text-align:center;margin-top:28px;}
+.blink{
+  display:inline-flex;align-items:center;gap:7px;
+  color:var(--t3);text-decoration:none;font-size:13px;
+  padding:9px 20px;border:1px solid var(--sur);border-radius:var(--r99);
+  transition:all .2s var(--ease);background:var(--sur3);
+  font-family:inherit;
 }
-.back-link {
-    display: inline-flex; align-items: center; gap: 8px;
-    color: var(--text-2); text-decoration: none; font-size: 13px;
-    padding: 9px 20px;
-    border: 1px solid var(--border-sub);
-    border-radius: 99px;
-    transition: all 0.2s var(--ease);
-    background: rgba(255,255,255,0.03);
-}
-.back-link:hover {
-    color: var(--gold); border-color: var(--border-gold);
-    background: var(--gold-dim);
-    transform: translateY(-2px);
-}
+.blink:hover{color:var(--gold-l);border-color:var(--gold-bdr);background:var(--gold-dim);}
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width:5px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--border-gold); border-radius:99px; }
+/* scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--sur);border-radius:var(--r99);}
 
 /* ── RESPONSIVE ── */
-@media (max-width: 700px) {
-    .converter-body {
-        grid-template-columns: 1fr;
-    }
-    .swap-hub { display: none; }
-    .panel-left  { border-radius: var(--r-xl) var(--r-xl) 0 0; }
-    .panel-right { border-radius: 0 0 var(--r-xl) var(--r-xl); }
-    .h-divider { display: block; }
-    .panel { padding: 28px 22px 24px; }
-    .result-value { font-size: 17px; }
+@media(max-width:680px){
+  .pgrid{grid-template-columns:1fr;}
+  .dcol{display:none;}
+  .hsep{display:block;}
+  .panel{padding:22px 18px 20px;}
+  .panel-l{border-radius:0;}
+  .panel-r{border-radius:0 0 var(--r32) var(--r32);}
+  .rval{font-size:15px;}
+  .tabs{width:100%;border-radius:var(--r12);}
+  .pdrop{width:calc(100vw - 32px) !important;}
 }
-
-@media (max-width: 420px) {
-    .header-title { font-size: 22px; }
-    .panel { padding: 22px 16px 20px; }
-    .picker-dropdown { width: calc(100vw - 32px); }
+@media(max-width:400px){
+  body{padding:24px 10px 60px;}
+  .h1{font-size:20px;}
+  .tab{font-size:11px;padding:7px 11px;}
 }
 </style>
 </head>
-
 <body>
 
-<!-- ── BACKGROUND ── -->
-<div class="bg-aurora">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
+<!-- BACKGROUND -->
+<div class="aurora">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
 </div>
-<div class="stars" id="stars"></div>
 
-<!-- ── CONVERTER SHELL ── -->
-<div class="converter-shell" x-data="converterApp">
+<!-- CALENDAR DROPDOWN PORTAL — rendered outside card, never clipped -->
+<div id="picker-portal"></div>
 
-    <!-- HEADER -->
-    <div class="header-area">
-        <div>
-            <div class="header-eyebrow">
-                <span class="eyebrow-dot"></span>
-                {{ pcal_trans('converter_title') }}
-            </div>
-        </div>
-        <h1 class="header-title">{{ pcal_trans('converter_title') }}</h1>
-        <p class="header-sub">{{ pcal_trans('gregorian_to_pashto') }} &nbsp;&bull;&nbsp; {{ pcal_trans('pashto_to_gregorian') }}</p>
+<div class="shell" x-data="mainApp">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="eyebrow"><span class="edot"></span>{{ pcal_trans('converter_title') }}</div>
+    <h1 class="h1">{{ pcal_trans('converter_title') }}</h1>
+    <p class="h2">Gregorian <span>•</span> Pashto (Shamsi) <span>•</span> Islamic (Hijri)</p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <template x-for="(tab,i) in tabs" :key="i">
+      <button class="tab" :class="activeTab===i?'a'+tab.fc:''" @click="switchTab(i)" x-text="tab.label"></button>
+    </template>
+  </div>
+
+  <!-- CARD -->
+  <div class="card">
+
+    <!-- Direction strip -->
+    <div class="dstrip">
+      <div class="dpill" :class="cur.fc">
+        <span x-text="cur.fromPill"></span>
+      </div>
+      <div class="darrow">→</div>
+      <div class="dpill" :class="cur.tc">
+        <span x-text="cur.toPill"></span>
+      </div>
     </div>
 
-    <!-- CONVERTER BODY -->
-    <div class="converter-body">
+    <div class="pgrid">
 
-        <!-- ── LEFT PANEL: Gregorian → Pashto ── -->
-        <div class="panel panel-left">
-            <div class="panel-badge">
-                <span class="panel-badge-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                </span>
-                <span class="panel-badge-text">Gregorian</span>
-            </div>
-            <h2 class="panel-title">{{ pcal_trans('gregorian_to_pashto') }}</h2>
+      <!-- ── FROM PANEL ── -->
+      <div class="panel panel-l">
+        <div class="abar" :class="cur.fc"></div>
 
-            <label class="field-label">{{ pcal_trans('gregorian_date_label') }}</label>
-            <div class="field-wrap">
-                <input type="date" class="field-input"
-                       x-model="gregorianInput"
-                       @change="convertGregorian"
-                       @keyup.enter="convertGregorian">
-            </div>
-
-            <button class="btn-convert" @click="convertGregorian">
-                <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    {{ pcal_trans('convert') }}
-                </span>
-            </button>
-
-            <div x-show="pashtoResult" x-transition style="display:none;" class="result-box">
-                <span class="result-label">{{ pcal_trans('pashto_to_gregorian') ?? 'Result' }}</span>
-                <button class="result-copy-btn" @click="copyText(pashtoResult)" title="Copy">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                    Copy
-                </button>
-                <div class="result-value" x-text="pashtoResult"></div>
-            </div>
+        <div class="badge" :class="cur.fc">
+          <span class="bicon" :class="cur.fc">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 :stroke="cur.fromType==='hijri'?'#fff':'#000'" stroke-width="2.5">
+              <template x-if="cur.fromType!=='hijri'">
+                <g><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></g>
+              </template>
+              <template x-if="cur.fromType==='hijri'">
+                <g><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></g>
+              </template>
+            </svg>
+          </span>
+          <span x-text="cur.fromBadge"></span>
         </div>
 
-        <!-- ── CENTER DIVIDER + SWAP ── -->
-        <div class="swap-hub">
-            <div class="swap-line"></div>
-            <button class="swap-btn" title="Swap panels">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3L4 7l4 4"/><path d="M4 7h16"/><path d="M16 21l4-4-4-4"/><path d="M20 17H4"/></svg>
+        <div class="ptitle" x-text="cur.fromTitle"></div>
+
+        <!-- Gregorian input -->
+        <template x-if="cur.fromType==='gregorian'">
+          <div>
+            <label class="flabel">{{ pcal_trans('gregorian_date_label') }}</label>
+            <div class="fwrap">
+              <input type="date" class="finput g"
+                     x-model="gregInput"
+                     @change="runConvert"
+                     @keyup.enter="runConvert">
+            </div>
+            <button class="btn g" @click="runConvert">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              {{ pcal_trans('convert') }}
             </button>
-            <div class="swap-line"></div>
+          </div>
+        </template>
+
+        <!-- Pashto input + picker -->
+        <template x-if="cur.fromType==='pashto'">
+          <div>
+            <label class="flabel">{{ pcal_trans('pashto_date_label') }}</label>
+            <div class="fwrap">
+              <input type="text" class="finput t finput-pr"
+                     x-model="pashtoTxt"
+                     placeholder="{{ pcal_trans('eg_date') }}"
+                     @keyup.enter="submitPashto">
+              <button class="cal-btn t" @click.stop="togglePicker('pashto',$event)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              </button>
+            </div>
+            <button class="btn t" @click="submitPashto">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              {{ pcal_trans('convert') }}
+            </button>
+          </div>
+        </template>
+
+        <!-- Hijri input + picker -->
+        <template x-if="cur.fromType==='hijri'">
+          <div>
+            <label class="flabel">Hijri Date</label>
+            <div class="fwrap">
+              <input type="text" class="finput r finput-pr"
+                     x-model="hijriTxt"
+                     placeholder="e.g. 1447/01/01"
+                     @keyup.enter="submitHijri">
+              <button class="cal-btn r" @click.stop="togglePicker('hijri',$event)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              </button>
+            </div>
+            <button class="btn r" @click="submitHijri">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              {{ pcal_trans('convert') }}
+            </button>
+          </div>
+        </template>
+      </div>
+
+      <!-- ── CENTRE DIVIDER ── -->
+      <div class="dcol">
+        <div class="dline"></div>
+        <button class="swapbtn" @click="swap" title="Swap">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3L4 7l4 4"/><path d="M4 7h16"/><path d="M16 21l4-4-4-4"/><path d="M20 17H4"/></svg>
+        </button>
+        <div class="dline"></div>
+      </div>
+
+      <!-- ── TO PANEL ── -->
+      <div class="panel panel-r">
+        <div class="abar" :class="cur.tc"></div>
+
+        <div class="badge" :class="cur.tc">
+          <span class="bicon" :class="cur.tc">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 :stroke="cur.toType==='hijri'?'#fff':'#000'" stroke-width="2.5">
+              <template x-if="cur.toType!=='hijri'">
+                <g><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></g>
+              </template>
+              <template x-if="cur.toType==='hijri'">
+                <g><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></g>
+              </template>
+            </svg>
+          </span>
+          <span x-text="cur.toBadge"></span>
         </div>
 
-        <!-- ── RIGHT PANEL: Pashto → Gregorian ── -->
-        <div class="panel panel-right" x-data="pashtoDatePicker">
+        <div class="ptitle" x-text="cur.toTitle"></div>
 
-            <!-- horizontal divider for mobile -->
-            <div class="h-divider" style="display:none; margin: 0 0 24px; position:relative; height:1px; background: linear-gradient(90deg,transparent,rgba(240,165,0,0.2),transparent);">
-                <div class="h-divider-hub">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3L4 7l4 4"/><path d="M4 7h16"/><path d="M16 21l4-4-4-4"/><path d="M20 17H4"/></svg>
-                </div>
-            </div>
+        <div class="result-area">
+          <div x-show="!result&&!loading" class="hint">
+            <div class="hbar" :class="cur.tc"></div>
+            <div class="htxt">Pick a date on the left<br>and press Convert.</div>
+          </div>
 
-            <div class="panel-badge" style="background:var(--teal-dim); border-color:rgba(13,217,196,0.22);">
-                <span class="panel-badge-icon" style="background:linear-gradient(135deg,var(--teal),#0aa898);">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                </span>
-                <span class="panel-badge-text" style="color:#9decdf;">Pashto</span>
-            </div>
-            <h2 class="panel-title">{{ pcal_trans('pashto_to_gregorian') }}</h2>
+          <div x-show="loading" class="spinner-box">
+            <svg class="spinner" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)">
+              <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"/>
+            </svg>
+          </div>
 
-            <label class="field-label">{{ pcal_trans('pashto_date_label') }}</label>
-            <div class="field-wrap" style="position:relative;">
-                <input type="text"
-                       class="field-input field-input-icon"
-                       x-model="dateText"
-                       placeholder="{{ pcal_trans('eg_date') }}"
-                       @keyup.enter="convertFromText"
-                       @focus="open = false">
-                <button type="button" class="field-icon-btn" @click.stop="open = !open" title="{{ pcal_trans('open_calendar') }}">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                </button>
-
-                <!-- Calendar Dropdown -->
-                <div x-show="open" x-transition class="picker-dropdown" @click.away="open = false" style="display:none;">
-                    <div class="picker-header">
-                        <button class="picker-nav" @click="changeMonth(-1)">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 18 9 12 15 6"/></svg>
-                        </button>
-                        <div class="picker-month-title" x-text="monthName + ' ' + viewYear"></div>
-                        <button class="picker-nav" @click="changeMonth(1)">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
-                        </button>
-                    </div>
-                    <div class="picker-grid">
-                        <template x-for="n in ['ش','ی','د','س','چ','پ','ج']">
-                            <div class="picker-day-name" x-text="n"></div>
-                        </template>
-                        <template x-for="(d, idx) in days" :key="idx">
-                            <div :class="['picker-cell', d.day ? '' : 'empty', d.day && isSelected(d.day) ? 'selected' : '', d.day && isToday(d.day) ? 'today' : '']"
-                                 @click="d.day && selectDate(d.day)"
-                                 x-text="d.day || ''">
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn-convert" style="background:linear-gradient(135deg,var(--teal),#0aa898);" @click="convertFromText">
-                <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    {{ pcal_trans('convert') }}
-                </span>
+          <div x-show="result" x-transition class="rbox" :class="cur.tc" style="display:none">
+            <span class="rlabel">Result</span>
+            <button class="rcopy" @click="copy">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              <span x-text="copied?'✓ Copied':'Copy'"></span>
             </button>
-
-            <div x-show="gregorianResult" x-transition style="display:none;"
-                 class="result-box" style="border-color:rgba(13,217,196,0.2); background:linear-gradient(135deg,rgba(13,217,196,0.06),rgba(240,165,0,0.03));">
-                <span class="result-label">Gregorian Result</span>
-                <button class="result-copy-btn" @click="copyText(gregorianResult)" title="Copy"
-                        style="background:var(--teal-dim); border-color:rgba(13,217,196,0.25); color:var(--teal);">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                    Copy
-                </button>
-                <div class="result-value" style="color:#9decdf;" x-text="gregorianResult"></div>
-            </div>
+            <div class="rval" x-text="resultMain"></div>
+            <div class="rsub" x-show="resultSub" x-text="resultSub"></div>
+          </div>
         </div>
+      </div>
 
-    </div><!-- /converter-body -->
+    </div><!-- /pgrid -->
+    <div class="hsep"></div>
+  </div><!-- /card -->
 
-    <!-- FOOTER -->
-    <div class="footer-area">
-        <a href="/pashto-calendar" class="back-link">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-            {{ pcal_trans('back_to_calendar') }}
-        </a>
-    </div>
+  <div class="footer">
+    <a href="/pashto-calendar" class="blink">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      {{ pcal_trans('back_to_calendar') }}
+    </a>
+  </div>
+</div>
 
-</div><!-- /converter-shell -->
-
-<!-- Translation strings -->
 <script>
-window.converterTrans = {
-    pickDateFirst: @json(pcal_trans('pick_date_first')),
-    invalidFormat: @json(pcal_trans('invalid_format')),
-    conversionFailed: @json(pcal_trans('conversion_failed')),
+/* ── Translation strings passed from PHP ── */
+window.pcalT = {
+  invalidFormat: @json(pcal_trans('invalid_format')),
+  failed:        @json(pcal_trans('conversion_failed')),
 };
 
+/* ─────────────────────────────────────────────────────────────
+   CALENDAR PICKER — portal-based, position:fixed
+   Rendered into #picker-portal (outside .card) so it is NEVER
+   clipped by any parent's overflow or border-radius.
+───────────────────────────────────────────────────────────── */
+const PickerPortal = {
+  _el: null,
+  _type: null,   // 'pashto' | 'hijri'
+  _state: null,  // reference to the Alpine state object
+  _trigger: null,
+
+  pashtoMonths: ['','وری','غویی','غبرګولی','چنګاښ','زمری','وږی','تله','لړم','لیندۍ','مرغومی','سلواغه','کب'],
+  hijriMonths:  ['','محرم','صفر','ربیع الأول','ربیع الثاني','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'],
+
+  /* ── Hijri helpers ── */
+  hijriMonthLen(y, m) {
+    if (m % 2 === 1) return 30;
+    const leapYears = [2,5,7,10,13,16,18,21,24,26,29];
+    if (m === 12 && leapYears.includes(y % 30)) return 30;
+    return 29;
+  },
+  hijriToJd(y, m, d) {
+    return Math.floor((11*y+3)/30) + 354*y + 30*m - Math.floor((m-1)/2) + d + 1948440 - 385;
+  },
+  hijriFirstDow(y, m) {
+    return (this.hijriToJd(y, m, 1) + 1) % 7; // 0=Sun
+  },
+
+  /* ── Pashto helpers ── */
+  pashtoMonthLen(y, m) {
+    const l = [31,31,31,31,31,31,30,30,30,30,30,29];
+    if (m === 12 && [1,5,9,13,17,21,25,29].includes(y % 33)) return 30;
+    return l[m-1];
+  },
+  pashtoFirstDow(y, m) {
+    let t = 0;
+    for (let yr = 1403; yr < y; yr++)
+      t += [1,5,9,13,17,21,25,29].includes(yr%33) ? 366 : 365;
+    for (let mo = 1; mo < m; mo++)
+      t += this.pashtoMonthLen(y, mo);
+    return (t + 4) % 7; // 0=Sat in Pashto week
+  },
+
+  open(type, triggerEl, state) {
+    this._type    = type;
+    this._state   = state;
+    this._trigger = triggerEl;
+    this._render();
+    this._position();
+    // close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', this._outside, { once: true });
+      document.addEventListener('scroll', this._onScroll, { passive:true, capture:true });
+    }, 10);
+  },
+
+  close() {
+    const el = document.getElementById('picker-portal');
+    if (el) el.innerHTML = '';
+    document.removeEventListener('click', this._outside);
+    document.removeEventListener('scroll', this._onScroll, true);
+    this._el = null;
+  },
+
+  _outside(e) {
+    const el = document.getElementById('picker-portal');
+    if (el && !el.contains(e.target)) PickerPortal.close();
+  },
+  _onScroll() { PickerPortal._position(); },
+
+  _position() {
+    const drop = document.querySelector('#picker-portal .pdrop');
+    if (!drop || !this._trigger) return;
+    const tr  = this._trigger.getBoundingClientRect();
+    const vw  = window.innerWidth;
+    const vh  = window.innerHeight;
+    const dw  = Math.min(300, vw - 32);
+    drop.style.width = dw + 'px';
+
+    let left = tr.left;
+    if (left + dw > vw - 8) left = Math.max(8, vw - dw - 8);
+
+    // Open below trigger; flip above if not enough room
+    const dropH = drop.offsetHeight || 320;
+    let top = tr.bottom + 8;
+    if (top + dropH > vh - 8) top = Math.max(8, tr.top - dropH - 8);
+
+    drop.style.top  = top  + 'px';
+    drop.style.left = left + 'px';
+  },
+
+  _navigate(delta) {
+    const s = this._state;
+    let m = s.vm + delta, y = s.vy;
+    if (m > 12) { m = 1; y++; }
+    if (m < 1)  { m = 12; y--; }
+    s.vm = m; s.vy = y;
+    this._render();
+    this._position();
+  },
+
+  _select(day) {
+    const s  = this._state;
+    s.sy = s.vy; s.sm = s.vm; s.sd = day;
+    const pad = n => String(n).padStart(2,'0');
+    const txt = `${s.vy}/${pad(s.vm)}/${pad(day)}`;
+    if (this._type === 'pashto') {
+      window.__mc.pashtoTxt = txt;
+      window.__mc.submitPashto();
+    } else {
+      window.__mc.hijriTxt  = txt;
+      window.__mc.submitHijri();
+    }
+    this.close();
+  },
+
+  _render() {
+    const portal = document.getElementById('picker-portal');
+    if (!portal) return;
+    const s = this._state;
+    const t = this._type;
+    const color = t === 'pashto' ? 't' : 'r';
+
+    const monthName = t === 'pashto'
+      ? this.pashtoMonths[s.vm]
+      : this.hijriMonths[s.vm];
+
+    const dim  = t === 'pashto'
+      ? this.pashtoMonthLen(s.vy, s.vm)
+      : this.hijriMonthLen(s.vy, s.vm);
+
+    const first = t === 'pashto'
+      ? this.pashtoFirstDow(s.vy, s.vm)
+      : this.hijriFirstDow(s.vy, s.vm);
+
+    const dayNames = t === 'pashto'
+      ? ['ش','ی','د','س','چ','پ','ج']
+      : ['ح','ن','ث','ر','خ','ج','س'];
+
+    let cells = '';
+    for (let i = 0; i < first; i++)
+      cells += `<div class="pcell empty"></div>`;
+    for (let d = 1; d <= dim; d++) {
+      const isSel   = s.sy === s.vy && s.sm === s.vm && s.sd === d;
+      const isToday = s.ty === s.vy && s.tm === s.vm && s.td === d;
+      const cls = ['pcell', isSel?'sel':'', isToday?'today':''].filter(Boolean).join(' ');
+      cells += `<div class="${cls}" onclick="PickerPortal._select(${d})">${d}</div>`;
+    }
+
+    portal.innerHTML = `
+      <div class="pdrop ${color}">
+        <div class="phdr">
+          <button class="pnav" onclick="PickerPortal._navigate(-1)">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="pmtitle">
+            ${monthName}
+            <span class="pyear">${s.vy}</span>
+          </div>
+          <button class="pnav" onclick="PickerPortal._navigate(1)">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div class="pcalgrid">
+          ${dayNames.map(n=>`<div class="pdn">${n}</div>`).join('')}
+          ${cells}
+        </div>
+      </div>`;
+  },
+};
+
+/* ─────────────────────────────────────────────────────────────
+   ALPINE APP
+───────────────────────────────────────────────────────────── */
 document.addEventListener('alpine:init', () => {
+  Alpine.data('mainApp', () => ({
+    activeTab: 0,
+    result: '', resultMain: '', resultSub: '',
+    loading: false,
+    copied:  false,
 
-    Alpine.data('converterApp', () => ({
-        gregorianInput: '',
-        pashtoResult: '',
+    gregInput:  '',
+    pashtoTxt:  '',
+    hijriTxt:   '',
 
-        copyText(txt) {
-            navigator.clipboard?.writeText(txt);
-        },
+    /* Picker state (shared between Pashto + Hijri pickers via PickerPortal) */
+    pashtoState: {
+      vy: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->year }},
+      vm: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->month }},
+      sy: null, sm: null, sd: null,
+      ty: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->year }},
+      tm: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->month }},
+      td: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->day }},
+    },
+    hijriState: {
+      vy: {{ (int) \Qadir\PashtoCalendar\Converter\HijriConverter::gregorianToHijri(
+                date('Y'), date('n'), date('j')
+            )[0] }},
+      vm: {{ (int) \Qadir\PashtoCalendar\Converter\HijriConverter::gregorianToHijri(
+                date('Y'), date('n'), date('j')
+            )[1] }},
+      sy: null, sm: null, sd: null,
+      ty: {{ (int) \Qadir\PashtoCalendar\Converter\HijriConverter::gregorianToHijri(
+                date('Y'), date('n'), date('j')
+            )[0] }},
+      tm: {{ (int) \Qadir\PashtoCalendar\Converter\HijriConverter::gregorianToHijri(
+                date('Y'), date('n'), date('j')
+            )[1] }},
+      td: {{ (int) \Qadir\PashtoCalendar\Converter\HijriConverter::gregorianToHijri(
+                date('Y'), date('n'), date('j')
+            )[2] }},
+    },
 
-        async convertGregorian() {
-            if (!this.gregorianInput) return;
+    tabs: [
+      {label:'Gregorian → Pashto',  fromType:'gregorian',toType:'pashto',    fc:'g',tc:'t',
+       fromPill:'Gregorian',   toPill:'Pashto',        fromBadge:'Gregorian',    toBadge:'Pashto (Shamsi)',
+       fromTitle:'Enter a Gregorian date', toTitle:'Pashto (Shamsi) result'},
+      {label:'Gregorian → Hijri',   fromType:'gregorian',toType:'hijri',     fc:'g',tc:'r',
+       fromPill:'Gregorian',   toPill:'Islamic Hijri', fromBadge:'Gregorian',    toBadge:'Islamic Hijri',
+       fromTitle:'Enter a Gregorian date', toTitle:'Hijri result'},
+      {label:'Pashto → Gregorian',  fromType:'pashto',   toType:'gregorian', fc:'t',tc:'g',
+       fromPill:'Pashto',      toPill:'Gregorian',     fromBadge:'Pashto (Shamsi)', toBadge:'Gregorian',
+       fromTitle:'Enter a Pashto (Shamsi) date', toTitle:'Gregorian result'},
+      {label:'Pashto → Hijri',      fromType:'pashto',   toType:'hijri',     fc:'t',tc:'r',
+       fromPill:'Pashto',      toPill:'Islamic Hijri', fromBadge:'Pashto (Shamsi)', toBadge:'Islamic Hijri',
+       fromTitle:'Enter a Pashto (Shamsi) date', toTitle:'Hijri result'},
+      {label:'Hijri → Gregorian',   fromType:'hijri',    toType:'gregorian', fc:'r',tc:'g',
+       fromPill:'Islamic Hijri',toPill:'Gregorian',    fromBadge:'Islamic Hijri',toBadge:'Gregorian',
+       fromTitle:'Enter an Islamic (Hijri) date', toTitle:'Gregorian result'},
+      {label:'Hijri → Pashto',      fromType:'hijri',    toType:'pashto',    fc:'r',tc:'t',
+       fromPill:'Islamic Hijri',toPill:'Pashto',       fromBadge:'Islamic Hijri',toBadge:'Pashto (Shamsi)',
+       fromTitle:'Enter an Islamic (Hijri) date', toTitle:'Pashto result'},
+    ],
 
-            try {
-                const r = await fetch(
-                    `/pashto-calendar/convert/gregorian?date=${encodeURIComponent(this.gregorianInput)}`
-                );
+    get cur() { return this.tabs[this.activeTab]; },
 
-                const d = await r.json();
+    init() { window.__mc = this; },
 
-                if (d.error) {
-                    alert(d.error);
-                    return;
-                }
+    switchTab(i) {
+      this.activeTab = i;
+      this.result = this.resultMain = this.resultSub = '';
+      PickerPortal.close();
+    },
 
-                this.pashtoResult =
-                    `${d.formatted} (${d.year}-${d.month}-${d.day})`;
+    swap() {
+      const t = this.cur;
+      const rev = this.tabs.findIndex(x => x.fromType===t.toType && x.toType===t.fromType);
+      if (rev !== -1) { this.activeTab = rev; this.result = this.resultMain = this.resultSub = ''; }
+      PickerPortal.close();
+    },
 
-            } catch {
-                alert(window.converterTrans.conversionFailed);
-            }
+    togglePicker(type, event) {
+      const el = document.querySelector('#picker-portal .pdrop');
+      if (el) { PickerPortal.close(); return; }
+      const state = type === 'pashto' ? this.pashtoState : this.hijriState;
+      PickerPortal.open(type, event.currentTarget, state);
+    },
+
+    copy() {
+      if (!this.result) return;
+      navigator.clipboard?.writeText(this.result);
+      this.copied = true;
+      setTimeout(() => this.copied = false, 2000);
+    },
+
+    /* ── GREGORIAN source ── */
+    async runConvert() {
+      if (!this.gregInput) return;
+      this.loading = true; this.result = this.resultMain = this.resultSub = '';
+      try {
+        const toType = this.cur.toType;
+        const url = toType === 'pashto'
+          ? `/pashto-calendar/convert/gregorian?date=${encodeURIComponent(this.gregInput)}`
+          : `/pashto-calendar/convert/gregorian-to-hijri?date=${encodeURIComponent(this.gregInput)}`;
+        const d = await fetch(url).then(r => r.json());
+        if (d.error) { alert(d.error); return; }
+        this._setResult(d, toType);
+      } catch { alert(window.pcalT.failed); }
+      finally   { this.loading = false; }
+    },
+
+    /* ── PASHTO source ── */
+    submitPashto() {
+      const p = this.pashtoTxt.split('/');
+      if (p.length !== 3 || p.some(x => !x.trim())) { alert(window.pcalT.invalidFormat); return; }
+      const y=+p[0], m=+p[1], d=+p[2];
+      this.pashtoState.sy = y; this.pashtoState.sm = m; this.pashtoState.sd = d;
+      this.pashtoState.vy = y; this.pashtoState.vm = m;
+      this._runFromPashto(y, m, d);
+    },
+
+    async _runFromPashto(y, m, d) {
+      this.loading = true; this.result = this.resultMain = this.resultSub = '';
+      try {
+        const toType = this.cur.toType;
+        const url = toType === 'gregorian'
+          ? `/pashto-calendar/convert/pashto?year=${y}&month=${m}&day=${d}`
+          : `/pashto-calendar/convert/pashto-to-hijri?year=${y}&month=${m}&day=${d}`;
+        const data = await fetch(url).then(r => r.json());
+        if (data.error) { alert(data.error); return; }
+        this._setResult(data, toType);
+      } catch { alert(window.pcalT.failed); }
+      finally   { this.loading = false; }
+    },
+
+    /* ── HIJRI source ── */
+    submitHijri() {
+      const p = this.hijriTxt.split('/');
+      if (p.length !== 3 || p.some(x => !x.trim())) { alert(window.pcalT.invalidFormat); return; }
+      const y=+p[0], m=+p[1], d=+p[2];
+      this.hijriState.sy = y; this.hijriState.sm = m; this.hijriState.sd = d;
+      this.hijriState.vy = y; this.hijriState.vm = m;
+      this._runFromHijri(y, m, d);
+    },
+
+    async _runFromHijri(y, m, d) {
+      this.loading = true; this.result = this.resultMain = this.resultSub = '';
+      try {
+        const toType = this.cur.toType;
+        const url = toType === 'gregorian'
+          ? `/pashto-calendar/convert/hijri-to-gregorian?year=${y}&month=${m}&day=${d}`
+          : `/pashto-calendar/convert/hijri-to-pashto?year=${y}&month=${m}&day=${d}`;
+        const data = await fetch(url).then(r => r.json());
+        if (data.error) { alert(data.error); return; }
+        this._setResult(data, toType);
+      } catch { alert(window.pcalT.failed); }
+      finally   { this.loading = false; }
+    },
+
+    /* ── Parse & display result ── */
+    _setResult(d, toType) {
+      if (toType === 'gregorian') {
+        // Clean Gregorian: "2025-06-27" → "27 June 2025"
+        const raw = d.gregorian || `${d.year}-${String(d.month).padStart(2,'0')}-${String(d.day).padStart(2,'0')}`;
+        const dt  = new Date(raw + 'T12:00:00');
+        this.resultMain = dt.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+        this.resultSub  = raw;
+        this.result     = this.resultMain;
+
+      } else if (toType === 'pashto') {
+        // Pashto: show formatted + numeric
+        this.resultMain = d.formatted || `${d.year}/${String(d.month).padStart(2,'0')}/${String(d.day).padStart(2,'0')}`;
+        this.resultSub  = `${d.year}/${String(d.month).padStart(2,'0')}/${String(d.day).padStart(2,'0')}`;
+        this.result     = this.resultMain;
+
+      } else {
+        // Hijri: show "1 محرم 1447" on top, numeric below
+        // d.formatted = "1 محرم 1447  (1447/01/01)"  — split on the parenthesis
+        const formatted = d.formatted || '';
+        const parenIdx  = formatted.indexOf('(');
+        if (parenIdx > 0) {
+          this.resultMain = formatted.substring(0, parenIdx).trim();
+          this.resultSub  = d.hijri || formatted.substring(parenIdx).replace(/[()]/g,'').trim();
+        } else {
+          this.resultMain = formatted || d.hijri || `${d.year}/${d.month}/${d.day}`;
+          this.resultSub  = d.hijri  || '';
         }
-    }));
-
-    Alpine.data('pashtoDatePicker', () => ({
-        dateText: '',
-        open: false,
-
-        viewYear: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->year }},
-        viewMonth: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->month }},
-
-        selectedDay: null,
-        selectedMonth: null,
-        selectedYear: null,
-
-        todayYear: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->year }},
-        todayMonth: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->month }},
-        todayDay: {{ \Qadir\PashtoCalendar\PashtoCalendar::now()->day }},
-
-        monthNames: [
-            '',
-            'وری',
-            'غویی',
-            'غبرګولی',
-            'چنګاښ',
-            'زمری',
-            'وږی',
-            'تله',
-            'لړم',
-            'لیندۍ',
-            'مرغومی',
-            'سلواغه',
-            'کب'
-        ],
-
-        gregorianResult: '',
-
-        get monthName() {
-            return this.monthNames[this.viewMonth] || '';
-        },
-
-        get days() {
-            const dim = this.daysInMonth(this.viewYear, this.viewMonth);
-            const first = this.firstDayOfWeek(this.viewYear, this.viewMonth);
-
-            const cells = [];
-
-            for (let i = 0; i < first; i++) cells.push({ day: null });
-
-            for (let d = 1; d <= dim; d++) cells.push({ day: d });
-
-            while (cells.length < 42) cells.push({ day: null });
-
-            return cells;
-        },
-
-        daysInMonth(y, m) {
-            const l = [31,31,31,31,31,31,30,30,30,30,30,29];
-
-            if (
-                m === 12 &&
-                [1,5,9,13,17,21,25,29].includes(y % 33)
-            ) {
-                return 30;
-            }
-
-            return l[m - 1];
-        },
-
-        firstDayOfWeek(y, m) {
-            let t = 0;
-
-            for (let yr = 1403; yr < y; yr++) {
-                t += this.isLeapYear(yr) ? 366 : 365;
-            }
-
-            for (let mo = 1; mo < m; mo++) {
-                t += this.daysInMonth(y, mo);
-            }
-
-            return (t + 4) % 7;
-        },
-
-        isLeapYear(y) {
-            return [1,5,9,13,17,21,25,29].includes(y % 33);
-        },
-
-        isSelected(d) {
-            return this.selectedYear &&
-                this.selectedMonth === this.viewMonth &&
-                this.selectedYear === this.viewYear &&
-                d === this.selectedDay;
-        },
-
-        isToday(d) {
-            return d === this.todayDay &&
-                this.viewMonth === this.todayMonth &&
-                this.viewYear === this.todayYear;
-        },
-
-        changeMonth(delta) {
-            let m = this.viewMonth + delta;
-            let y = this.viewYear;
-
-            if (m > 12) {
-                m = 1;
-                y++;
-            }
-
-            if (m < 1) {
-                m = 12;
-                y--;
-            }
-
-            this.viewMonth = m;
-            this.viewYear = y;
-        },
-
-        selectDate(d) {
-            this.selectedYear = this.viewYear;
-            this.selectedMonth = this.viewMonth;
-            this.selectedDay = d;
-
-            this.dateText =
-                `${this.selectedYear}/${String(this.selectedMonth).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
-
-            this.open = false;
-
-            this.convertPashto();
-        },
-
-        async convertPashto() {
-            try {
-                const r = await fetch(
-                    `/pashto-calendar/convert/pashto?year=${this.selectedYear}&month=${this.selectedMonth}&day=${this.selectedDay}`
-                );
-
-                const d = await r.json();
-
-                if (d.error) {
-                    alert(d.error);
-                    return;
-                }
-
-                this.gregorianResult = d.gregorian;
-
-            } catch {
-                alert(window.converterTrans.conversionFailed);
-            }
-        },
-
-        convertFromText() {
-            const p = this.dateText.split('/');
-
-            if (p.length !== 3) {
-                alert(window.converterTrans.invalidFormat);
-                return;
-            }
-
-            this.selectedYear = parseInt(p[0]);
-            this.selectedMonth = parseInt(p[1]);
-            this.selectedDay = parseInt(p[2]);
-
-            this.viewYear = this.selectedYear;
-            this.viewMonth = this.selectedMonth;
-
-            this.convertPashto();
-        }
-    }));
+        this.result = this.resultMain;
+      }
+    },
+  }));
 });
 </script>
+
 </body>
 </html>
-```

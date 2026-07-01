@@ -261,22 +261,32 @@ Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month
     ]);
 })->middleware('web');
 
-    // prayer time route
-    Route::get('/pashto-calendar/prayer-times/{city?}', function ($city = 'kabul') {
-    $service = new \Qadir\PashtoCalendar\Services\PrayerTimeService($city);
-    $times = $service->getTimes();
-    return response()->json([
-        'times'     => [
-            'fajr'    => $times['fajr'],
-            'sunrise' => $times['sunrise'],
-            'dhuhr'   => $times['dhuhr'],
-            'asr'     => $times['asr'],
-            'maghrib' => $times['maghrib'],
-            'isha'    => $times['isha'],
-        ],
-        'city_name' => $times['city_name'],
-    ]);
-})->middleware('web');
+    // ── Prayer times API ───────────────────────────────────────
+        Route::get('/pashto-calendar/prayer-times/{city?}', function ($city = 'kabul') {
+            $service = new \Qadir\PashtoCalendar\Services\PrayerTimeService($city);
+            $times   = $service->getTimes();
+            return response()->json([
+                'times' => [
+                    'fajr'    => $times['fajr'],
+                    'sunrise' => $times['sunrise'],
+                    'dhuhr'   => $times['dhuhr'],
+                    'asr'     => $times['asr'],
+                    'maghrib' => $times['maghrib'],
+                    'isha'    => $times['isha'],
+                ],
+                // 24-hour raw values — needed by the front-end countdown
+                'times_24' => [
+                    'fajr'    => $times['fajr_24']    ?? null,
+                    'sunrise' => $times['sunrise_24'] ?? null,
+                    'dhuhr'   => $times['dhuhr_24']   ?? null,
+                    'asr'     => $times['asr_24']     ?? null,
+                    'maghrib' => $times['maghrib_24'] ?? null,
+                    'isha'    => $times['isha_24']    ?? null,
+                ],
+                'city_name' => $times['city_name'],
+                'timezone'  => $times['timezone'] ?? 'Asia/Kabul',
+            ]);
+        })->middleware('web');
         // Demo page
         Route::get('/pashto-calendar/demo', function () {
             $now    = \Qadir\PashtoCalendar\PashtoCalendar::now();
@@ -322,40 +332,136 @@ Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month
             }
         })->middleware('web');
 
-        // Year data API
-        Route::get('/pashto-calendar/year-data/{year}', function ($year) {
-            $year = (int) $year;
-            $months = [];
-            $monthNames = ['', 'وری', 'غویی', 'غبرګولی', 'چنګاښ', 'زمری', 'وږی', 'تله', 'لړم', 'لیندۍ', 'مرغومی', 'سلواغه', 'کب'];
-            $today = \Qadir\PashtoCalendar\PashtoCalendar::now();
-
-            for ($m = 1; $m <= 12; $m++) {
-                $days = \Qadir\PashtoCalendar\PashtoCalendar::make($year, $m);
-                $daysArray = [];
-                foreach ($days as $day) {
-                    if (!empty($day['empty'])) {
-                        $daysArray[] = ['day' => null];
-                        continue;
-                    }
-                    $daysArray[] = [
-                        'day'       => $day['day'],
-                        'isToday'   => ($year == $today->year && $m == $today->month && $day['day'] == $today->day),
-                        'isHoliday' => $day['is_holiday'] ?? false,
-                    ];
-                }
-                $months[] = [
-                    'number' => $m,
-                    'name'   => $monthNames[$m],
-                    'days'   => $daysArray,
-                ];
+        // ── Gregorian → Hijri ────────────────────────────────────────
+        Route::get('/pashto-calendar/convert/gregorian-to-hijri', function (\Illuminate\Http\Request $request) {
+            $date = $request->query('date');
+            if (!$date) return response()->json(['error' => 'Missing date parameter'], 422);
+            try {
+                $c = \Carbon\Carbon::parse($date);
+                [$hy, $hm, $hd] = \Qadir\PashtoCalendar\Converter\HijriConverter::gregorianToHijri(
+                    (int)$c->format('Y'), (int)$c->format('m'), (int)$c->format('d')
+                );
+                return response()->json([
+                    'year'      => $hy,
+                    'month'     => $hm,
+                    'day'       => $hd,
+                    'formatted' => \Qadir\PashtoCalendar\Converter\HijriConverter::formatHijri($hy, $hm, $hd),
+                    'hijri'     => sprintf('%04d/%02d/%02d', $hy, $hm, $hd),
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Invalid Gregorian date'], 422);
             }
-
-            return response()->json([
-                'year'   => $year,
-                'months' => $months,
-            ]);
         })->middleware('web');
 
+        // ── Hijri → Gregorian ────────────────────────────────────────
+        Route::get('/pashto-calendar/convert/hijri-to-gregorian', function (\Illuminate\Http\Request $request) {
+            $year  = $request->query('year');
+            $month = $request->query('month');
+            $day   = $request->query('day');
+            if (!$year || !$month || !$day) return response()->json(['error' => 'Missing year/month/day'], 422);
+            try {
+                [$gy, $gm, $gd] = \Qadir\PashtoCalendar\Converter\HijriConverter::hijriToGregorian(
+                    (int)$year, (int)$month, (int)$day
+                );
+                return response()->json([
+                    'gregorian' => \Carbon\Carbon::create($gy, $gm, $gd)->format('Y-m-d'),
+                    'year' => $gy, 'month' => $gm, 'day' => $gd,
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Invalid Hijri date'], 422);
+            }
+        })->middleware('web');
+
+        // ── Pashto → Hijri ───────────────────────────────────────────
+        Route::get('/pashto-calendar/convert/pashto-to-hijri', function (\Illuminate\Http\Request $request) {
+            $year  = $request->query('year');
+            $month = $request->query('month');
+            $day   = $request->query('day');
+            if (!$year || !$month || !$day) return response()->json(['error' => 'Missing year/month/day'], 422);
+            try {
+                [$hy, $hm, $hd] = \Qadir\PashtoCalendar\Converter\HijriConverter::pashtoToHijri(
+                    (int)$year, (int)$month, (int)$day
+                );
+                return response()->json([
+                    'year'      => $hy,
+                    'month'     => $hm,
+                    'day'       => $hd,
+                    'formatted' => \Qadir\PashtoCalendar\Converter\HijriConverter::formatHijri($hy, $hm, $hd),
+                    'hijri'     => sprintf('%04d/%02d/%02d', $hy, $hm, $hd),
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Invalid Pashto date'], 422);
+            }
+        })->middleware('web');
+
+        // ── Hijri → Pashto ───────────────────────────────────────────
+        Route::get('/pashto-calendar/convert/hijri-to-pashto', function (\Illuminate\Http\Request $request) {
+            $year  = $request->query('year');
+            $month = $request->query('month');
+            $day   = $request->query('day');
+            if (!$year || !$month || !$day) return response()->json(['error' => 'Missing year/month/day'], 422);
+            try {
+                [$jy, $jm, $jd] = \Qadir\PashtoCalendar\Converter\HijriConverter::hijriToPashto(
+                    (int)$year, (int)$month, (int)$day
+                );
+                $pashto = new \Qadir\PashtoCalendar\PashtoDate($jy, $jm, $jd);
+                return response()->json([
+                    'year'      => $jy,
+                    'month'     => $jm,
+                    'day'       => $jd,
+                    'formatted' => $pashto->format('Y/m/d'),
+                    'pashto'    => $pashto->format('Y/m/d'),
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Invalid Hijri date'], 422);
+            }
+        })->middleware('web');
+
+        // Year data API
+      Route::get('/pashto-calendar/year-data/{year}', function ($year) {
+    $year       = (int) $year;
+    $monthNames = ['', 'وری', 'غویی', 'غبرګولی', 'چنګاښ', 'زمری', 'وږی', 'تله', 'لړم', 'لیندۍ', 'مرغومی', 'سلواغه', 'کب'];
+    $today      = \Qadir\PashtoCalendar\PashtoCalendar::now();
+    $months     = [];
+
+    for ($m = 1; $m <= 12; $m++) {
+
+        // Load events for this month and index by day number
+        $allEvents   = \Qadir\PashtoCalendar\Models\PashtoEvent::getOccurrencesForMonth($year, $m);
+        $eventsByDay = [];
+        foreach ($allEvents as $event) {
+            $eventsByDay[$event->day] = true;
+        }
+
+        $days      = \Qadir\PashtoCalendar\PashtoCalendar::make($year, $m);
+        $daysArray = [];
+
+        foreach ($days as $day) {
+            if (!empty($day['empty'])) {
+                $daysArray[] = ['day' => null];
+                continue;
+            }
+
+            $daysArray[] = [
+                'day'        => $day['day'],
+                'isToday'    => ($year == $today->year && $m == $today->month && $day['day'] == $today->day),
+                'isHoliday'  => $day['is_holiday'] ?? false,
+                'eventCount' => isset($eventsByDay[$day['day']]) ? 1 : 0,
+            ];
+        }
+
+        $months[] = [
+            'number' => $m,
+            'name'   => $monthNames[$m],
+            'days'   => $daysArray,
+        ];
+    }
+
+    return response()->json([
+        'year'   => $year,
+        'months' => $months,
+    ]);
+})->middleware('web');
         // Year page
         Route::get('/pashto-calendar/year', function (\Illuminate\Http\Request $request) {
             $year = (int) $request->query('year', \Qadir\PashtoCalendar\PashtoCalendar::now()->year);

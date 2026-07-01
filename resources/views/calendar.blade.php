@@ -62,36 +62,64 @@
    LIGHT MODE OVERRIDES
 ============================================================ */
 body.light {
-    --bg-base:        #f0f4f8;
-    --bg-surface:     #e8eef5;
+    --bg-base:        #eef6f9;
+    --bg-surface:     #e3f2f8;
     --bg-card:        #ffffff;
-    --bg-card-hover:  #f8fafc;
-    --bg-input:       #f1f5f9;
-    --border-subtle:  rgba(0,0,0,0.08);
-    --border-accent:  rgba(180,83,9,0.2);
-    --border-focus:   rgba(180,83,9,0.5);
+    --bg-card-hover:  #f1fbfd;
+    --bg-input:       #eef8fb;
+    --border-subtle:  rgba(15,23,42,0.08);
+    --border-accent:  rgba(6,182,212,0.28);
+    --border-focus:   rgba(6,182,212,0.55);
 
-    --amber:          #d97706;
-    --amber-light:    #f59e0b;
-    --amber-dim:      rgba(217,119,6,0.1);
-    --teal:           #0d9488;
-    --teal-dim:       rgba(13,148,136,0.08);
+    --amber:          #0891b2;
+    --amber-light:    #06b6d4;
+    --amber-dim:      rgba(8,145,178,0.1);
+    --teal:           #0e7490;
+    --teal-dim:       rgba(14,116,144,0.08);
     --rose:           #e11d48;
     --rose-dim:       rgba(225,29,72,0.08);
-    --blue:           #3b82f6;
-    --blue-dim:       rgba(59,130,246,0.08);
+    --blue:           #2563eb;
+    --blue-dim:       rgba(37,99,235,0.08);
 
-    --text-primary:   #0f172a;
-    --text-secondary: #334155;
-    --text-muted:     #64748b;
+    --text-primary:   #000000;
+    --text-secondary: #1f2937;
+    --text-muted:     #52606d;
 
-    --shadow-sm:      0 2px 8px rgba(0,0,0,0.08);
-    --shadow-md:      0 8px 32px rgba(0,0,0,0.1);
-    --shadow-lg:      0 20px 60px rgba(0,0,0,0.15);
-    --shadow-glow:    0 0 30px rgba(217,119,6,0.06);
+    --shadow-sm:      0 2px 8px rgba(15,23,42,0.07);
+    --shadow-md:      0 8px 28px rgba(15,23,42,0.09);
+    --shadow-lg:      0 20px 60px rgba(15,23,42,0.14);
+    --shadow-glow:    0 0 30px rgba(6,182,212,0.10);
 
-    --nav-bg:         rgba(255,255,255,0.96);
-    --nav-border:     rgba(180,83,9,0.1);
+    --nav-bg:         rgba(255,255,255,0.97);
+    --nav-border:     rgba(6,182,212,0.16);
+}
+
+/* ============================================================
+   LIGHT MODE — cyan accent overrides for hardcoded glow colors
+============================================================ */
+body.light .topbar::before {
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(6,182,212,0.55) 30%,
+        rgba(34,211,238,0.9) 50%,
+        rgba(6,182,212,0.55) 70%,
+        transparent 100%);
+}
+
+body.light .topbar-center::before {
+    background: radial-gradient(ellipse, rgba(6,182,212,0.14) 0%, transparent 70%);
+}
+
+body.light .nav-pill:hover {
+    background: rgba(8,145,178,0.16);
+    border-color: rgba(8,145,178,0.55);
+    box-shadow: 0 4px 16px rgba(8,145,178,0.16), inset 0 1px 0 rgba(255,255,255,0.5);
+    color: #0e7490;
+}
+
+body.light .nav-arrow:hover:not(:disabled) {
+    background: rgba(8,145,178,0.18);
+    box-shadow: 0 4px 16px rgba(8,145,178,0.2);
 }
 
 /* ============================================================
@@ -780,8 +808,9 @@ body.light .cal-day:hover {
 }
 
 body.light .cal-day.is-today {
-    background: linear-gradient(135deg, rgba(217,119,6,0.08), rgba(245,158,11,0.04));
-    border-color: rgba(217,119,6,0.4);
+    background: linear-gradient(135deg, rgba(6,182,212,0.10), rgba(8,145,178,0.05));
+    border-color: rgba(6,182,212,0.4);
+    box-shadow: 0 0 0 1px rgba(6,182,212,0.12), var(--shadow-md);
 }
 
 .events-section {
@@ -865,24 +894,6 @@ body.light .event-card { background: #f8fafc; }
     flex-wrap: wrap;
 }
 
-.footer-link {
-    padding: 8px 20px;
-    background: var(--amber-dim);
-    border: 1px solid var(--border-accent);
-    border-radius: 99px;
-    color: var(--amber);
-    font-size: 12px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: var(--transition);
-}
-
-.footer-link:hover {
-    background: rgba(245,158,11,0.2);
-    border-color: var(--amber);
-    transform: translateY(-1px);
-}
-
 .footer-badge {
     font-size: 11px;
     color: var(--text-muted);
@@ -924,8 +935,8 @@ body.light .event-card { background: #f8fafc; }
 
 body.light .modal-box {
     background: #ffffff;
-    border-color: rgba(180,83,9,0.15);
-    box-shadow: 0 30px 80px rgba(0,0,0,0.12);
+    border-color: rgba(6,182,212,0.2);
+    box-shadow: 0 30px 80px rgba(15,23,42,0.10), 0 0 50px rgba(6,182,212,0.08);
 }
 
 .modal-header {
@@ -1143,7 +1154,12 @@ select.modal-input { cursor: pointer; appearance: auto; }
     box-shadow: 0 4px 12px rgba(245,158,11,0.3);
 }
 
-body.light .btn-primary { color: #fff; background: linear-gradient(135deg, #d97706, #b45309); }
+body.light .btn-primary {
+    color: #fff;
+    background: linear-gradient(135deg, #0891b2, #0e7490);
+    box-shadow: 0 4px 12px rgba(8,145,178,0.28);
+}
+body.light .btn-primary:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(8,145,178,0.42); }
 .btn-primary:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(245,158,11,0.45); transform: translateY(-1px); }
 .btn-primary:active:not(:disabled) { transform: scale(0.97); }
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
