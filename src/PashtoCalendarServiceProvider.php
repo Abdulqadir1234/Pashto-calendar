@@ -15,8 +15,8 @@ use Qadir\PashtoCalendar\Support\Holidays;
 use Qadir\PashtoCalendar\Services\HolidayService;
 use Qadir\PashtoCalendar\Console\Commands\RefreshHolidays;
 use Illuminate\Support\Facades\App;
-
 use Spatie\IcalendarGenerator\Components\Event;
+
 class PashtoCalendarServiceProvider extends ServiceProvider
 {
     public function register(): void
@@ -36,116 +36,102 @@ class PashtoCalendarServiceProvider extends ServiceProvider
         });
     }
 
-public function boot(): void
-{
-    $timezone = config('pashto-calendar.timezone', 'Asia/Kabul');
-    date_default_timezone_set($timezone);
+    public function boot(): void
+    {
+        $timezone = config('pashto-calendar.timezone', 'Asia/Kabul');
+        date_default_timezone_set($timezone);
 
-    $this->loadViewsFrom(__DIR__.'/../resources/views', 'pashto-calendar');
-    $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'pashto-calendar');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'pashto-calendar');
 
-    // ✅ Load translations
-    $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'pashto-calendar');
+        Blade::component('pashto-mini-calendar', MiniCalendar::class);
 
-    Blade::component('pashto-mini-calendar', MiniCalendar::class);
+        $this->publishes([
+            __DIR__.'/../config/pashto-calendar.php' => config_path('pashto-calendar.php'),
+        ], 'pashto-calendar-config');
 
-    $this->publishes([
-        __DIR__.'/../config/pashto-calendar.php' => config_path('pashto-calendar.php'),
-    ], 'pashto-calendar-config');
+        $this->publishes([
+            __DIR__.'/../resources/views' => resource_path('views/vendor/pashto-calendar'),
+        ], 'pashto-calendar-views');
 
-    $this->publishes([
-        __DIR__.'/../resources/views' => resource_path('views/vendor/pashto-calendar'),
-    ], 'pashto-calendar-views');
+        $this->publishes([
+            __DIR__.'/../resources/lang' => lang_path('vendor/pashto-calendar'),
+        ], 'pashto-calendar-lang');
 
-    $this->publishes([
-        __DIR__.'/../resources/lang' => lang_path('vendor/pashto-calendar'),
-    ], 'pashto-calendar-lang');
+        Blade::component('pashto-calendar', Calendar::class);
 
-    Blade::component('pashto-calendar', Calendar::class);
+        \Qadir\PashtoCalendar\Support\BladeDirectives::register();
+        \Qadir\PashtoCalendar\Support\CarbonMacros::register();
 
-    \Qadir\PashtoCalendar\Support\BladeDirectives::register();
-    \Qadir\PashtoCalendar\Support\CarbonMacros::register();
+        $this->registerValidationRules();
+        $this->registerRoutes();
 
-    $this->registerValidationRules();
-    $this->registerRoutes();
+        Blade::if('Holiday', function ($month, $day) {
+            return Holidays::isHoliday($month, $day);
+        });
 
-    Blade::if('Holiday', function ($month, $day) {
-        return Holidays::isHoliday($month, $day);
-    });
+        $this->autoSeedHolidays();
 
-    $this->autoSeedHolidays();
+        if ($this->app->runningInConsole()) {
+            $this->commands([RefreshHolidays::class]);
+        }
 
-    if ($this->app->runningInConsole()) {
-        $this->commands([
-            RefreshHolidays::class,
-        ]);
+        $this->mergeConfigFrom(__DIR__.'/../config/pashto-prayer-cities.php', 'pashto-prayer-cities');
+
+        $this->publishes([
+            __DIR__.'/../public' => public_path('vendor/pashto-calendar'),
+        ], 'pashto-calendar-assets');
+
+        Blade::component('pashto-prayer-times', \Qadir\PashtoCalendar\View\Components\PrayerTimes::class);
     }
-
-    //prayer time component
-    // Merge prayer cities config (so it's always available)
-$this->mergeConfigFrom(__DIR__.'/../config/pashto-prayer-cities.php', 'pashto-prayer-cities');
-
-// Publish the cities config
-$this->publishes([
-    __DIR__.'/../public' => public_path('vendor/pashto-calendar'),
-], 'pashto-calendar-assets');
-// Register the prayer times component
-Blade::component('pashto-prayer-times', \Qadir\PashtoCalendar\View\Components\PrayerTimes::class);
-}
 
     protected function registerRoutes(): void
     {
-        // Update event
+        // ── Update event ─────────────────────────────────────────────
         Route::put('/pashto-calendar/event/{id}', function (\Illuminate\Http\Request $request, $id) {
             $data = $request->validate([
-                'title'                => 'required|string|max:255',
-                'description'          => 'nullable|string',
-                'time'                 => 'nullable|string|max:50',
-                'year'                 => 'required|integer|min:1300|max:1500',
-                'month'                => 'required|integer|min:1|max:12',
-                'day'                  => 'required|integer|min:1|max:31',
-                'color'                => 'nullable|string|max:20',
-                'recurrence'           => 'nullable|in:none,daily,weekly,monthly,yearly',
-                'recurrence_end_date'  => 'nullable|date',
+                'title'               => 'required|string|max:255',
+                'description'         => 'nullable|string',
+                'time'                => 'nullable|string|max:50',
+                'year'                => 'required|integer|min:1300|max:1500',
+                'month'               => 'required|integer|min:1|max:12',
+                'day'                 => 'required|integer|min:1|max:31',
+                'color'               => 'nullable|string|max:20',
+                'recurrence'          => 'nullable|in:none,daily,weekly,monthly,yearly',
+                'recurrence_end_date' => 'nullable|date',
             ]);
-
             $event = \Qadir\PashtoCalendar\Models\PashtoEvent::findOrFail($id);
             $event->update($data);
             return response()->json($event);
         })->middleware('web');
 
-        // Create event
+        // ── Create event ──────────────────────────────────────────────
         Route::post('/pashto-calendar/event', function (\Illuminate\Http\Request $request) {
             $validated = $request->validate([
-                'title'                => 'required|string|max:255',
-                'description'          => 'nullable|string',
-                'time'                 => 'nullable|string|max:50',
-                'year'                 => 'required|integer|min:1300|max:1500',
-                'month'                => 'required|integer|min:1|max:12',
-                'day'                  => 'required|integer|min:1|max:31',
-                'color'                => 'nullable|string|max:20',
-                'recurrence'           => 'nullable|in:none,daily,weekly,monthly,yearly',
-                'recurrence_end_date'  => 'nullable|date',
+                'title'               => 'required|string|max:255',
+                'description'         => 'nullable|string',
+                'time'                => 'nullable|string|max:50',
+                'year'                => 'required|integer|min:1300|max:1500',
+                'month'               => 'required|integer|min:1|max:12',
+                'day'                 => 'required|integer|min:1|max:31',
+                'color'               => 'nullable|string|max:20',
+                'recurrence'          => 'nullable|in:none,daily,weekly,monthly,yearly',
+                'recurrence_end_date' => 'nullable|date',
             ]);
-
             try {
                 $event = \Qadir\PashtoCalendar\Models\PashtoEvent::create($validated);
                 return response()->json($event, 201);
             } catch (\Exception $e) {
-                return response()->json([
-                    'error' => 'Could not create event',
-                    'message' => $e->getMessage()
-                ], 500);
+                return response()->json(['error' => 'Could not create event', 'message' => $e->getMessage()], 500);
             }
         })->middleware('web');
 
-        // Delete event
+        // ── Delete event ──────────────────────────────────────────────
         Route::delete('/pashto-calendar/event/{id}', function ($id) {
             try {
                 $deleted = \Qadir\PashtoCalendar\Events\EventManager::delete((int) $id);
-                if ($deleted) {
-                    return response()->json(['success' => true]);
-                }
+                if ($deleted) return response()->json(['success' => true]);
                 return response()->json(['error' => 'Event not found'], 404);
             } catch (\Exception $e) {
                 return response()->json(['error' => 'Deletion failed'], 500);
@@ -156,7 +142,7 @@ Blade::component('pashto-prayer-times', \Qadir\PashtoCalendar\View\Components\Pr
             return;
         }
 
-        // Main calendar page (initial load)
+        // ── Main calendar page ────────────────────────────────────────
         Route::get('/pashto-calendar', function () {
             $now   = \Qadir\PashtoCalendar\PashtoCalendar::now();
             $year  = (int) request('year', $now->year);
@@ -165,38 +151,34 @@ Blade::component('pashto-prayer-times', \Qadir\PashtoCalendar\View\Components\Pr
             if ($month > 12) { $month = 1;  $year++; }
             if ($month < 1)  { $month = 12; $year--; }
 
-            $rawDays = \Qadir\PashtoCalendar\PashtoCalendar::make($year, $month);
-
-            // ✅ Inject recurrence‑aware occurrences
+            $rawDays   = \Qadir\PashtoCalendar\PashtoCalendar::make($year, $month);
             $allEvents = \Qadir\PashtoCalendar\Models\PashtoEvent::getOccurrencesForMonth($year, $month);
+
             $eventsByDay = [];
             foreach ($allEvents as $event) {
                 $eventsByDay[$event->day][] = $event;
             }
             foreach ($rawDays as &$day) {
                 if (!empty($day['empty'])) continue;
-                $dayNum = $day['day'];
-                $day['events'] = $eventsByDay[$dayNum] ?? [];
+                $day['events']      = $eventsByDay[$day['day']] ?? [];
                 $day['event_count'] = count($day['events']);
             }
             unset($day);
 
-            // Convert to clean Alpine array
             $alpineDays = [];
             foreach ($rawDays as $day) {
-                if (!empty($day['empty'])) {
-                    $alpineDays[] = ['empty' => true];
-                    continue;
-                }
+                if (!empty($day['empty'])) { $alpineDays[] = ['empty' => true]; continue; }
                 $alpineDays[] = [
                     'day'          => $day['day'],
                     'empty'        => false,
-                    'is_today'     => $day['is_today'] ?? false,
-                    'is_friday'    => $day['is_friday'] ?? false,
-                    'is_holiday'   => $day['is_holiday'] ?? false,
+                    'is_today'     => $day['is_today']     ?? false,
+                    'is_friday'    => $day['is_friday']    ?? false,
+                    'is_holiday'   => $day['is_holiday']   ?? false,
                     'holiday_name' => $day['holiday_name'] ?? '',
-                    'event_count'  => $day['event_count'] ?? 0,
-                    'events'       => isset($day['events']) ? collect($day['events'])->map(fn($e) => $e->toArray())->values()->all() : [],
+                    'event_count'  => $day['event_count']  ?? 0,
+                    'events'       => isset($day['events'])
+                        ? collect($day['events'])->map(fn($e) => $e->toArray())->values()->all()
+                        : [],
                 ];
             }
 
@@ -210,58 +192,47 @@ Blade::component('pashto-prayer-times', \Qadir\PashtoCalendar\View\Components\Pr
             ]);
         })->middleware('web');
 
-        //ical export route
-        
-Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month) {
-    $year  = (int) $year;
-    $month = (int) $month;
+        // ── iCal export ───────────────────────────────────────────────
+        Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month) {
+            $year  = (int) $year;
+            $month = (int) $month;
 
-    $allEvents = \Qadir\PashtoCalendar\Models\PashtoEvent::getOccurrencesForMonth($year, $month);
+            $allEvents = \Qadir\PashtoCalendar\Models\PashtoEvent::getOccurrencesForMonth($year, $month);
+            if (empty($allEvents)) return response('No events to export', 404);
 
-    if (empty($allEvents)) {
-        return response('No events to export', 404);
-    }
+            $calendar = \Spatie\IcalendarGenerator\Components\Calendar::create(
+                config('app.name', 'Pashto Calendar')
+            )->refreshInterval(5);
 
-    $calendar = \Spatie\IcalendarGenerator\Components\Calendar::create(config('app.name', 'Pashto Calendar'))
-        ->refreshInterval(5);
+            foreach ($allEvents as $event) {
+                $gregorian = to_gregorian($year, $month, $event->day);
+                $time      = ($event->time && preg_match('/^\d{1,2}:\d{2}$/', trim($event->time)))
+                    ? trim($event->time) : '00:00';
+                $calendar->event(
+                    \Spatie\IcalendarGenerator\Components\Event::create($event->title)
+                        ->description(strip_tags($event->description ?? ''))
+                        ->startsAt(new \DateTime($gregorian . ' ' . $time))
+                        ->endsAt(new \DateTime($gregorian . ' ' . $time))
+                        ->uniqueIdentifier($event->id)
+                );
+            }
 
-    foreach ($allEvents as $event) {
-        $gregorian = to_gregorian($year, $month, $event->day);
+            return response($calendar->get())
+                ->header('Content-Type', 'text/calendar; charset=utf-8')
+                ->header('Content-Disposition', 'attachment; filename="pashto-calendar-'.$year.'-'.$month.'.ics"');
+        })->middleware('web');
 
-        // Safely format the time
-        $time = $event->time ? trim($event->time) : '';
-        // If the time does not match a HH:MM pattern, fallback to 00:00
-        if (!preg_match('/^\d{1,2}:\d{2}$/', $time)) {
-            $time = '00:00';
-        }
+        // ── Converter page ────────────────────────────────────────────
+        Route::get('/pashto-calendar/converter', function (\Illuminate\Http\Request $request) {
+            if ($request->has('lang') && in_array($request->query('lang'), ['ps', 'fa', 'en'])) {
+                App::setLocale($request->query('lang'));
+            }
+            return view('pashto-calendar::converter', [
+                'rtl' => config('pashto-calendar.rtl', true),
+            ]);
+        })->middleware('web');
 
-        $calendar->event(
-            \Spatie\IcalendarGenerator\Components\Event::create($event->title)
-                ->description(strip_tags($event->description ?? ''))
-                ->startsAt(new \DateTime($gregorian . ' ' . $time))
-                ->endsAt(new \DateTime($gregorian . ' ' . $time))
-                ->uniqueIdentifier($event->id)
-        );
-    }
-
-    return response($calendar->get())
-        ->header('Content-Type', 'text/calendar; charset=utf-8')
-        ->header('Content-Disposition', 'attachment; filename="pashto-calendar-' . $year . '-' . $month . '.ics"');
-})->middleware('web');
-
-        // Converter page
-      Route::get('/pashto-calendar/converter', function (\Illuminate\Http\Request $request) {
-    // Temporary testing code – set locale from query parameter
-    if ($request->has('lang') && in_array($request->query('lang'), ['ps', 'fa', 'en'])) {
-        App::setLocale($request->query('lang'));
-    }
-
-    return view('pashto-calendar::converter', [
-        'rtl' => config('pashto-calendar.rtl', true),
-    ]);
-})->middleware('web');
-
-    // ── Prayer times API ───────────────────────────────────────
+        // ── Prayer times API ──────────────────────────────────────────
         Route::get('/pashto-calendar/prayer-times/{city?}', function ($city = 'kabul') {
             $service = new \Qadir\PashtoCalendar\Services\PrayerTimeService($city);
             $times   = $service->getTimes();
@@ -274,7 +245,6 @@ Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month
                     'maghrib' => $times['maghrib'],
                     'isha'    => $times['isha'],
                 ],
-                // 24-hour raw values — needed by the front-end countdown
                 'times_24' => [
                     'fajr'    => $times['fajr_24']    ?? null,
                     'sunrise' => $times['sunrise_24'] ?? null,
@@ -287,36 +257,32 @@ Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month
                 'timezone'  => $times['timezone'] ?? 'Asia/Kabul',
             ]);
         })->middleware('web');
-        // Demo page
+
+        // ── Demo page ─────────────────────────────────────────────────
         Route::get('/pashto-calendar/demo', function () {
             $now    = \Qadir\PashtoCalendar\PashtoCalendar::now();
             $sample = \Qadir\PashtoCalendar\PashtoCalendar::parse('2024-03-20');
-            return view('pashto-calendar::demo', [
-                'now'    => $now,
-                'sample' => $sample,
-            ]);
+            return view('pashto-calendar::demo', ['now' => $now, 'sample' => $sample]);
         })->middleware('web');
 
-        // Gregorian → Pashto converter API
+        // ── Gregorian → Pashto ────────────────────────────────────────
         Route::get('/pashto-calendar/convert/gregorian', function (\Illuminate\Http\Request $request) {
             $date = $request->query('date');
-            if (!$date) {
-                return response()->json(['error' => 'Missing date parameter'], 422);
-            }
+            if (!$date) return response()->json(['error' => 'Missing date parameter'], 422);
             try {
-                $pashto = \Qadir\PashtoCalendar\PashtoCalendar::fromGregorian($date);
+                $p = \Qadir\PashtoCalendar\PashtoCalendar::fromGregorian($date);
                 return response()->json([
-                    'year'      => $pashto->year,
-                    'month'     => $pashto->month,
-                    'day'       => $pashto->day,
-                    'formatted' => $pashto->format('Y/m/d'),
+                    'year'      => $p->year,
+                    'month'     => $p->month,
+                    'day'       => $p->day,
+                    'formatted' => $p->format('Y/m/d'),
                 ]);
             } catch (\Exception $e) {
                 return response()->json(['error' => 'Invalid Gregorian date'], 422);
             }
         })->middleware('web');
 
-        // Pashto → Gregorian converter API
+        // ── Pashto → Gregorian ────────────────────────────────────────
         Route::get('/pashto-calendar/convert/pashto', function (\Illuminate\Http\Request $request) {
             $year  = $request->query('year');
             $month = $request->query('month');
@@ -332,7 +298,7 @@ Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month
             }
         })->middleware('web');
 
-        // ── Gregorian → Hijri ────────────────────────────────────────
+        // ── Gregorian → Hijri ─────────────────────────────────────────
         Route::get('/pashto-calendar/convert/gregorian-to-hijri', function (\Illuminate\Http\Request $request) {
             $date = $request->query('date');
             if (!$date) return response()->json(['error' => 'Missing date parameter'], 422);
@@ -353,7 +319,7 @@ Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month
             }
         })->middleware('web');
 
-        // ── Hijri → Gregorian ────────────────────────────────────────
+        // ── Hijri → Gregorian ─────────────────────────────────────────
         Route::get('/pashto-calendar/convert/hijri-to-gregorian', function (\Illuminate\Http\Request $request) {
             $year  = $request->query('year');
             $month = $request->query('month');
@@ -365,14 +331,16 @@ Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month
                 );
                 return response()->json([
                     'gregorian' => \Carbon\Carbon::create($gy, $gm, $gd)->format('Y-m-d'),
-                    'year' => $gy, 'month' => $gm, 'day' => $gd,
+                    'year'  => $gy,
+                    'month' => $gm,
+                    'day'   => $gd,
                 ]);
             } catch (\Exception $e) {
                 return response()->json(['error' => 'Invalid Hijri date'], 422);
             }
         })->middleware('web');
 
-        // ── Pashto → Hijri ───────────────────────────────────────────
+        // ── Pashto → Hijri ────────────────────────────────────────────
         Route::get('/pashto-calendar/convert/pashto-to-hijri', function (\Illuminate\Http\Request $request) {
             $year  = $request->query('year');
             $month = $request->query('month');
@@ -394,7 +362,7 @@ Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month
             }
         })->middleware('web');
 
-        // ── Hijri → Pashto ───────────────────────────────────────────
+        // ── Hijri → Pashto ────────────────────────────────────────────
         Route::get('/pashto-calendar/convert/hijri-to-pashto', function (\Illuminate\Http\Request $request) {
             $year  = $request->query('year');
             $month = $request->query('month');
@@ -417,52 +385,43 @@ Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month
             }
         })->middleware('web');
 
-        // Year data API
-      Route::get('/pashto-calendar/year-data/{year}', function ($year) {
-    $year       = (int) $year;
-    $monthNames = ['', 'وری', 'غویی', 'غبرګولی', 'چنګاښ', 'زمری', 'وږی', 'تله', 'لړم', 'لیندۍ', 'مرغومی', 'سلواغه', 'کب'];
-    $today      = \Qadir\PashtoCalendar\PashtoCalendar::now();
-    $months     = [];
+        // ── Year data API ─────────────────────────────────────────────
+        Route::get('/pashto-calendar/year-data/{year}', function ($year) {
+            $year       = (int) $year;
+            $monthNames = ['','وری','غویی','غبرګولی','چنګاښ','زمری','وږی','تله','لړم','لیندۍ','مرغومی','سلواغه','کب'];
+            $today      = \Qadir\PashtoCalendar\PashtoCalendar::now();
+            $months     = [];
 
-    for ($m = 1; $m <= 12; $m++) {
+            for ($m = 1; $m <= 12; $m++) {
+                $allEvents   = \Qadir\PashtoCalendar\Models\PashtoEvent::getOccurrencesForMonth($year, $m);
+                $eventsByDay = [];
+                foreach ($allEvents as $event) {
+                    $eventsByDay[$event->day] = true;
+                }
 
-        // Load events for this month and index by day number
-        $allEvents   = \Qadir\PashtoCalendar\Models\PashtoEvent::getOccurrencesForMonth($year, $m);
-        $eventsByDay = [];
-        foreach ($allEvents as $event) {
-            $eventsByDay[$event->day] = true;
-        }
+                $days      = \Qadir\PashtoCalendar\PashtoCalendar::make($year, $m);
+                $daysArray = [];
+                foreach ($days as $day) {
+                    if (!empty($day['empty'])) { $daysArray[] = ['day' => null]; continue; }
+                    $daysArray[] = [
+                        'day'        => $day['day'],
+                        'isToday'    => ($year == $today->year && $m == $today->month && $day['day'] == $today->day),
+                        'isHoliday'  => $day['is_holiday'] ?? false,
+                        'eventCount' => isset($eventsByDay[$day['day']]) ? 1 : 0,
+                    ];
+                }
 
-        $days      = \Qadir\PashtoCalendar\PashtoCalendar::make($year, $m);
-        $daysArray = [];
-
-        foreach ($days as $day) {
-            if (!empty($day['empty'])) {
-                $daysArray[] = ['day' => null];
-                continue;
+                $months[] = [
+                    'number' => $m,
+                    'name'   => $monthNames[$m],
+                    'days'   => $daysArray,
+                ];
             }
 
-            $daysArray[] = [
-                'day'        => $day['day'],
-                'isToday'    => ($year == $today->year && $m == $today->month && $day['day'] == $today->day),
-                'isHoliday'  => $day['is_holiday'] ?? false,
-                'eventCount' => isset($eventsByDay[$day['day']]) ? 1 : 0,
-            ];
-        }
+            return response()->json(['year' => $year, 'months' => $months]);
+        })->middleware('web');
 
-        $months[] = [
-            'number' => $m,
-            'name'   => $monthNames[$m],
-            'days'   => $daysArray,
-        ];
-    }
-
-    return response()->json([
-        'year'   => $year,
-        'months' => $months,
-    ]);
-})->middleware('web');
-        // Year page
+        // ── Year page ─────────────────────────────────────────────────
         Route::get('/pashto-calendar/year', function (\Illuminate\Http\Request $request) {
             $year = (int) $request->query('year', \Qadir\PashtoCalendar\PashtoCalendar::now()->year);
             return view('pashto-calendar::year', [
@@ -471,50 +430,64 @@ Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month
             ]);
         })->middleware('web');
 
-        // AJAX month data (with recurrence)
+        // ── AJAX month data ───────────────────────────────────────────
         Route::get('/pashto-calendar/data/{year}/{month}', function ($year, $month) {
             $year  = (int) $year;
             $month = (int) $month;
             if ($month > 12) { $month = 1;  $year++; }
             if ($month < 1)  { $month = 12; $year--; }
 
-            $rawDays = \Qadir\PashtoCalendar\PashtoCalendar::make($year, $month);
-
-            // Recurrence injection
+            $rawDays   = \Qadir\PashtoCalendar\PashtoCalendar::make($year, $month);
             $allEvents = \Qadir\PashtoCalendar\Models\PashtoEvent::getOccurrencesForMonth($year, $month);
+
             $eventsByDay = [];
             foreach ($allEvents as $event) {
                 $eventsByDay[$event->day][] = $event;
             }
             foreach ($rawDays as &$day) {
                 if (!empty($day['empty'])) continue;
-                $dayNum = $day['day'];
-                $day['events'] = $eventsByDay[$dayNum] ?? [];
+                $day['events']      = $eventsByDay[$day['day']] ?? [];
                 $day['event_count'] = count($day['events']);
             }
             unset($day);
 
-            // Convert to Alpine array
             $alpineDays = [];
             foreach ($rawDays as $day) {
-                if (!empty($day['empty'])) {
-                    $alpineDays[] = ['empty' => true];
-                    continue;
-                }
+                if (!empty($day['empty'])) { $alpineDays[] = ['empty' => true]; continue; }
                 $alpineDays[] = [
                     'day'          => $day['day'],
                     'empty'        => false,
-                    'is_today'     => $day['is_today'] ?? false,
-                    'is_friday'    => $day['is_friday'] ?? false,
-                    'is_holiday'   => $day['is_holiday'] ?? false,
+                    'is_today'     => $day['is_today']     ?? false,
+                    'is_friday'    => $day['is_friday']    ?? false,
+                    'is_holiday'   => $day['is_holiday']   ?? false,
                     'holiday_name' => $day['holiday_name'] ?? '',
-                    'event_count'  => $day['event_count'] ?? 0,
-                    'events'       => isset($day['events']) ? collect($day['events'])->map(fn($e) => $e->toArray())->values()->all() : [],
+                    'event_count'  => $day['event_count']  ?? 0,
+                    'events'       => isset($day['events'])
+                        ? collect($day['events'])->map(fn($e) => $e->toArray())->values()->all()
+                        : [],
                 ];
             }
 
             if (request()->has('json')) {
-                return response()->json(['days' => $alpineDays]);
+                /*
+                 * THE FIX — include gregorian_label in every JSON response.
+                 *
+                 * We convert the FIRST DAY of the requested Pashto month to
+                 * Gregorian using JalaliConverter::toGregorian() (PHP knows
+                 * the calendar system) and format it as "June 2025".
+                 *
+                 * The front-end reads `data.gregorian_label` in changeMonth()
+                 * and sets `this.gregorianLabel` directly — so JS never has
+                 * to do `new Date(pashtoYear, pashtoMonth-1)` which would
+                 * produce garbage like "April 1405".
+                 */
+                [$gy, $gm] = \Qadir\PashtoCalendar\Support\JalaliConverter::toGregorian($year, $month, 1);
+                $gregorianLabel = \Carbon\Carbon::create($gy, $gm, 1)->format('F Y');
+
+                return response()->json([
+                    'days'            => $alpineDays,
+                    'gregorian_label' => $gregorianLabel,
+                ]);
             }
 
             return view('pashto-calendar::_calendar_content', [
@@ -527,17 +500,12 @@ Route::get('/pashto-calendar/export/{year}/{month}.ics', function ($year, $month
 
     protected function autoSeedHolidays(): void
     {
-        if ($this->app->runningInConsole()) {
-            return;
-        }
-
-        if (!Schema::hasTable('pashto_holidays')) {
-            return;
-        }
+        if ($this->app->runningInConsole()) return;
+        if (!Schema::hasTable('pashto_holidays')) return;
 
         if (PashtoHoliday::count() === 0) {
             try {
-                $service = app(HolidayService::class);
+                $service     = app(HolidayService::class);
                 $currentYear = \Qadir\PashtoCalendar\PashtoCalendar::now()->year;
                 $service->fetchAndCacheYear($currentYear);
                 \Log::info('Pashto Calendar: Auto-seeded holidays for year ' . $currentYear);
